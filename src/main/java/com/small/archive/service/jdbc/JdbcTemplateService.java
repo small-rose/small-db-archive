@@ -5,6 +5,7 @@ import com.small.archive.utils.CamelCaseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -38,8 +39,15 @@ public class JdbcTemplateService {
         }
         jdbcTemplate.execute(sql);
     }
-
+    public <T> T queryForObject(String sql, Class<T> clazz, Object... params) {
+        log.info(">>> SQL: "+sql);
+        return  jdbcTemplate.queryForObject(sql, clazz);
+    }
+    public <T>  List<T> queryForList(String sql, Class<T> clazz) {
+        return  jdbcTemplate.query(sql, BeanPropertyRowMapper.newInstance(clazz));
+    }
     public <T> List<T> queryForList(String sql, Class<T> clazz, Object... params) {
+        log.info(">>> SQL: "+sql);
         final List<T> result = new ArrayList<>();
         //AtomicInteger no = new AtomicInteger();
         jdbcTemplate.query(sql,  rs -> {
@@ -57,6 +65,9 @@ public class JdbcTemplateService {
                     for (int i = 0; i < num; i++) {
                         // 获取值
                         Object value = rs.getObject(i + 1);
+                        if (value==null){
+                            continue;
+                        }
                         // table.column形式的字段去掉前缀table.
                         String columnName = resolveColumn(columnNames.get(i));
                         // 下划线转驼峰

@@ -2,12 +2,12 @@ package com.small.archive.utils;
 
 /**
  * @Project : small-db-archive
- * @Author : zhangzongyuan
- * @Description : [ CamelCaseUtils ] 说明：无
- * @Function :  功能说明：无
- * @Date ：2023/11/11 15:55
- * @Version ： 1.0
- **/
+ * @description: TODO 功能角色说明：
+ * TODO 描述：
+ * @author: 张小菜
+ * @date: 2023/11/12 012 0:22
+ * @version: v1.0
+ */
 public class CamelCaseUtils {
 
     private static final char SEPARATOR = '_';

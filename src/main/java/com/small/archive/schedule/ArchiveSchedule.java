@@ -1,5 +1,6 @@
 package com.small.archive.schedule;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,5 +16,28 @@ import org.springframework.stereotype.Component;
 public class ArchiveSchedule {
 
 
+    @Scheduled
+    public void initTaskStep(){
 
+    }
+
+
+
+    @Scheduled
+    public void processData(){
+
+    }
+
+
+
+    @Scheduled
+    public void validateData(){
+
+    }
+
+
+    @Scheduled
+    public void deleteData(){
+
+    }
 }

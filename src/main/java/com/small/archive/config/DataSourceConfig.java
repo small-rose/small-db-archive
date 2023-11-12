@@ -27,7 +27,7 @@ public class DataSourceConfig {
         return new JdbcTemplate(dataSource());
     }
 
-    @Bean
+    @Bean("archiveJdbcTemplate")
     public JdbcTemplate archiveJdbcTemplate(){
         return new JdbcTemplate(archiveDataSource());
     }

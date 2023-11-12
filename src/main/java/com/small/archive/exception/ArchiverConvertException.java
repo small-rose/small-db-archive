@@ -8,20 +8,20 @@ package com.small.archive.exception;
  * @date: 2023/11/12 012 0:22
  * @version: v1.0
  */
-public class DataArchiverException extends RuntimeException{
+public class ArchiverConvertException extends RuntimeException{
 
 
-    public DataArchiverException() {
+    public ArchiverConvertException() {
         super();
     }
 
 
-    public DataArchiverException(String message) {
+    public ArchiverConvertException(String message) {
         super(message);
     }
 
 
-    public DataArchiverException(String message, Throwable cause) {
+    public ArchiverConvertException(String message, Throwable cause) {
         super(message, cause);
     }
 }
