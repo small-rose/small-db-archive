@@ -1,9 +1,9 @@
 package com.small.archive.codeg;
 
 import com.small.archive.base.SmallDbArchiveAppTests;
-import com.small.archive.ext.TbColumn;
 import com.small.archive.service.jdbc.JdbcTemplateService;
 import com.small.archive.utils.CamelCaseUtils;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -62,4 +62,11 @@ public class CodePojoTests extends SmallDbArchiveAppTests {
     }
 
 
+}
+@Data
+class TbColumn {
+
+    private String tableName ;
+    private String columnName ;
+    private String dataType ;
 }
