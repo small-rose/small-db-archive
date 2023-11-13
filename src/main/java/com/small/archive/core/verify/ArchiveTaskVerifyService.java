@@ -58,7 +58,7 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
 
             acTask.setVerifyStart(new Date());
             acTask.setVerifyStart(null);
-            acTask.setVerifySize(0);
+            acTask.setVerifySize(null);
             archiveTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatus.VERIFYING);
 
             String sql = acTask.getTaskSql();
@@ -89,7 +89,7 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
             log.info("归档任务两侧库数据校对成功！");
 
             acTask.setVerifyEnd(new Date());
-            acTask.setVerifySize(sources.size());
+            acTask.setVerifySize(Long.valueOf(sources.size()));
             archiveTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatus.VERIFIED);
         } catch (Exception e) {
             String ex = ExceptionUtils.getStackTrace(e);
@@ -124,7 +124,7 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
             if (CollectionUtils.isEmpty(taskList)) {
                 throw new DataArchiverException("归档任务总数据校对失败！还有未执行完成的任务");
             }
-            int totalSize = conf.getTotalSize();
+            long totalSize = conf.getSourceTotalSize();
             long sum = taskList.stream().mapToLong(t -> t.getVerifySize()).sum();
             if (totalSize != sum) {
                 throw new DataArchiverException("归档任务总数据校对失败！当前批次【" + conf.getCurrentBatchNo() + "】归档数据总量对不上！");

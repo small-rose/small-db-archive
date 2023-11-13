@@ -15,23 +15,23 @@ import java.util.Date;
 @Data
 public class ArchiveConfDetailTask {
 
-    private long id ;
-    private long confId ;
+    private Long id ;
+    private Long confId ;
     private String currentBatchNo ;
-    private long taskOrder ;
+    private Long taskOrder ;
     private String taskSourceTab ;
     private String taskTargetTab ;
     private String taskSql ;
-    private long expectSize ;
-    private long actualSize ;
+    private Long expectSize ;
+    private Long actualSize ;
     private String taskStatus ;
     private Date createTime ;
     private Date taskStart ;
     private Date taskEnd ;
-    private long verifySize ;
+    private Long verifySize ;
     private Date verifyStart ;
     private Date verifyEnd ;
-    private long deleteSize ;
+    private Long deleteSize ;
     private Date deleteStart ;
     private Date deleteEnd ;
     private String errorInfo ;
