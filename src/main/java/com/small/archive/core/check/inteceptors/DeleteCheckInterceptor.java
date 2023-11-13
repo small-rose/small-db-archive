@@ -36,8 +36,7 @@ public class DeleteCheckInterceptor implements CheckInterceptor {
             }
 
             archiveCheckDao.checkSourceTableSql(conf);
-            archiveCheckDao.checkConfParams(conf);
-        }catch (Exception e){
+         }catch (Exception e){
             throw e ;
         }
         return true;

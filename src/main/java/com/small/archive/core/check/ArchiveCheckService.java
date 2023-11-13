@@ -1,6 +1,6 @@
 package com.small.archive.core.check;
 
-import com.small.archive.core.emuns.ArchiveCheckModeType;
+import com.small.archive.core.emuns.ArchiveModeStrategy;
 import com.small.archive.pojo.ArchiveConf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,13 +19,14 @@ public class ArchiveCheckService {
     @Autowired
     private ArchiveCheckFactory archiveCheckFactory;
 
+
+
     public boolean archiveBeforeCheck(ArchiveConf conf){
-        ArchiveBeforeCheck archiveBeforeCheck = archiveCheckFactory.getArchiveBeforeCheckStrategy(ArchiveCheckModeType.DEFAULT);
+        ArchiveBeforeCheck archiveBeforeCheck = archiveCheckFactory.getArchiveBeforeCheckStrategy(ArchiveModeStrategy.getMode(conf.getConfArchiveStrategy()));
         return archiveBeforeCheck.check(conf);
     }
 
-    public boolean archiveBeforeCheck(ArchiveConf conf, ArchiveCheckModeType archiveCheckModeType){
-        ArchiveBeforeCheck archiveBeforeCheck = archiveCheckFactory.getArchiveBeforeCheckStrategy(archiveCheckModeType);
-        return archiveBeforeCheck.check(conf);
-    }
+
+
+
 }

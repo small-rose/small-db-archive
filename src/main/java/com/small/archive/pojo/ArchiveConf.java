@@ -22,14 +22,28 @@ public class ArchiveConf {
     private String confSourceTab ;
     private String confTargetTab ;
     private String confWhere ;
+    /*
+     *  配置模式： CONF_MODE : ARCHIVE 数据归档, CLEAN-数据清理
+     */
     private String confMode ;
+    /**
+     *  归档策略 PK_NUM_MODE 主键数字模式、PK_NUM_MODE 主键字符串模式、DATE_MODE  日期归档模式、
+     */
+    private String confArchiveStrategy ;
     private String confPk ;
     private String currentBatchNo ;
-    // 本次归档总量
-    private int totalSize ;
-    // 分配归档大小
+    /**
+     * 本次归档/删除总量
+     */
+    private Long sourceTotalSize ;
+    private Long targetTotalSize ;
+    /**
+     * 分批归档/删除大小
+     */
     private int pageSize ;
-    // 归档任务优先级
+    /**
+     * 归档/删除任务优先级
+     */
     private int confPriority ;
     // 归档校验次数
     private int confCheckNums ;

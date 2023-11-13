@@ -10,7 +10,9 @@ package com.small.archive.core.constant;
 public class ArchiveConstant {
 
     public static final String COUNT_SOURCE = "COUNT_SOURCE";
+    public static final String SQL_SOURCE = "SQL_SOURCE";
     public static final String COUNT_TARGET = "COUNT_TARGET";
+    public static final String SQL_TARGETL = "SQL_TARGET";
 
 
 

@@ -1,7 +1,6 @@
 package com.small.archive.service.task;
 
-import com.small.archive.core.check.ArchiveCheckService;
-import com.small.archive.core.convertask.ArchiveConfToTaskService;
+import com.small.archive.core.check.inteceptors.CheckInterceptorManager;
 import com.small.archive.core.emuns.ArchiveConfStatus;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.pojo.ArchiveConf;
@@ -31,9 +30,8 @@ public class ArchiveConfCheckTask {
     private ArchiveDao archiveDao;
 
     @Autowired
-    private ArchiveCheckService archiveCheckService;
-    @Autowired
-    private ArchiveConfToTaskService archiveConfToTaskService;
+    private CheckInterceptorManager checkInterceptorManager;
+
 
 
 
@@ -46,7 +44,7 @@ public class ArchiveConfCheckTask {
             log.info("未检测到预备[PREPARE]的归档配置！");
         } else {
             for (ArchiveConf conf : archiveConfs) {
-                archiveCheckService.archiveBeforeCheck(conf);
+                checkInterceptorManager.applyCheck(conf);
             }
         }
 
@@ -59,7 +57,7 @@ public class ArchiveConfCheckTask {
         }
         log.info("检查上次 CHECKED_FAILED的数据, 检测到 CHECKED_FAILED 的归档配置: " + archiveCheckFailed.size() + " 个");
         for (ArchiveConf confFailed : archiveCheckFailed) {
-             archiveCheckService.archiveBeforeCheck(confFailed);
+            checkInterceptorManager.applyCheck(confFailed);
         }
     }
 }

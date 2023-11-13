@@ -6,19 +6,23 @@ package com.small.archive.core.emuns;
  * @date: 2023/11/12 012 0:22
  * @version: v1.0
  */
-public enum ArchiveModeType {
+public enum ArchiveModeStrategy {
 
-    PK_NUM_MODE("PK_NUM_MODE"),
+    ARCHIVE_PK_NUM("ARCHIVE_PK_NUM"),
+    ARCHIVE_PK_STR("ARCHIVE_PK_STR"),
+    ARCHIVE_DATE_DAY("ARCHIVE_DATE_DAY"),
+    ARCHIVE_DATE_MOTH("ARCHIVE_DATE_MOTH"),
+    ARCHIVE_DATE_YEAR("ARCHIVE_DATE_YEAR"),
     NULL_MODE("NULL_MODE");
 
     private String mode ;
 
-    ArchiveModeType(String mode) {
+    ArchiveModeStrategy(String mode) {
         this.mode = mode;
     }
 
-    public static ArchiveModeType getMode(String confMode) {
-         for (ArchiveModeType modeType : ArchiveModeType.values()){
+    public static ArchiveModeStrategy getMode(String confMode) {
+         for (ArchiveModeStrategy modeType : ArchiveModeStrategy.values()){
             if (modeType.mode.equals(confMode)){
                 return modeType;
             }
@@ -28,7 +32,7 @@ public enum ArchiveModeType {
 
     public static String getAllModeName() {
         StringBuffer sb = new StringBuffer("[");
-        for (ArchiveModeType modeType : ArchiveModeType.values()){
+        for (ArchiveModeStrategy modeType : ArchiveModeStrategy.values()){
             if (!modeType.name().equals(NULL_MODE.name())){
                 sb.append(modeType.name()).append(",");
             }

@@ -1,6 +1,6 @@
 package com.small.archive.core.check;
 
-import com.small.archive.core.emuns.ArchiveCheckModeType;
+import com.small.archive.core.emuns.ArchiveModeStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class ArchiveCheckFactory {
     private List<ArchiveBeforeCheck> checkList ;
 
 
-    public ArchiveBeforeCheck getArchiveBeforeCheckStrategy(ArchiveCheckModeType checkRuleName) {
+    public ArchiveBeforeCheck getArchiveBeforeCheckStrategy(ArchiveModeStrategy checkRuleName) {
 
         return checkList.stream().filter(s->(checkRuleName.equals(s.getCheckType()))).findFirst().get();
     }

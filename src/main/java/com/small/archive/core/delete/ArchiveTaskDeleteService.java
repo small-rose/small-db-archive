@@ -4,11 +4,11 @@ import com.small.archive.core.emuns.ArchiveConfStatus;
 import com.small.archive.core.emuns.ArchiveLogPhase;
 import com.small.archive.core.emuns.ArchiveLogStatus;
 import com.small.archive.core.transfer.ArchiveTaskService;
-import com.small.archive.dao.ArchiveDao;
 import com.small.archive.exception.DataArchiverException;
 import com.small.archive.pojo.ArchiveConf;
 import com.small.archive.pojo.ArchiveConfDetailTask;
 import com.small.archive.pojo.ArchiveConfTaskLog;
+import com.small.archive.service.ArchiveConfService;
 import com.small.archive.service.ArchiveLogService;
 import com.small.archive.utils.DigestUtils;
 import com.small.archive.utils.SqlUtils;
@@ -40,7 +40,7 @@ public class ArchiveTaskDeleteService implements ArchiveTaskDelete {
     @Autowired
     private ArchiveTaskService archiveTaskService;
     @Autowired
-    private ArchiveDao archiveDao;
+    private ArchiveConfService archiveConfService;
     @Autowired
     private ArchiveLogService archiveLogService;
 
@@ -57,7 +57,7 @@ public class ArchiveTaskDeleteService implements ArchiveTaskDelete {
             taskLog.setCreateTime(new Date());
 
 
-            archiveDao.updateArchiveConfStatus(conf.getId(), ArchiveConfStatus.DELETE);
+            archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.DELETE);
             // 查询满足删除条件的数据
             String whereSql = acTask.getTaskSql();
             String sql = SqlUtils.buildAppendSelectSql(acTask.getTaskSourceTab(), whereSql);
@@ -89,7 +89,7 @@ public class ArchiveTaskDeleteService implements ArchiveTaskDelete {
                 throw new DataArchiverException("归档删除任务，删除源库数据后校对出现差异，回滚删除!");
             }
             // 更新配置状态要已完成
-            archiveDao.updateArchiveConfStatus(conf.getId(), ArchiveConfStatus.SUCCESS);
+            archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.SUCCESS);
         } catch (Exception e) {
             String ex = ExceptionUtils.getStackTrace(e);
             taskLog.setExecResult(ArchiveLogStatus.ERROR.getStatus());

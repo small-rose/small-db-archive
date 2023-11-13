@@ -1,6 +1,6 @@
 package com.small.archive.core.check;
 
-import com.small.archive.core.emuns.ArchiveCheckModeType;
+import com.small.archive.core.emuns.ArchiveModeStrategy;
 import com.small.archive.pojo.ArchiveConf;
 /**
  * @description: TODO 功能角色说明：
@@ -11,7 +11,7 @@ import com.small.archive.pojo.ArchiveConf;
  */
 public interface ArchiveBeforeCheck {
 
-    public ArchiveCheckModeType getCheckType();
+    public ArchiveModeStrategy getCheckType();
 
     public boolean check(ArchiveConf conf);
 }

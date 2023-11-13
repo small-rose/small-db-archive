@@ -2,6 +2,8 @@ package com.small.archive.core.check.inteceptors;
 
 import com.small.archive.core.annotation.CustomInterceptors;
 import com.small.archive.core.annotation.DefaultInterceptors;
+import com.small.archive.core.constant.ArchiveConstant;
+import com.small.archive.core.context.ArchiveContextHolder;
 import com.small.archive.core.emuns.ArchiveConfMode;
 import com.small.archive.core.emuns.ArchiveConfStatus;
 import com.small.archive.core.emuns.ArchiveLogPhase;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Project: small-db-archive
@@ -55,7 +58,7 @@ public class CheckInterceptorManager {
         // 在责任链中先执行默认的拦截器
         //DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
         //TransactionStatus transactionStatus = transactionManager.getTransaction(transactionDefinition);
-        archiveConfService.updateArchiveConfStatus(conf.getId(), ArchiveConfStatus.CHECKING);
+        archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.CHECKING);
         try {
             for (CheckInterceptor interceptor : defaultInterceptors) {
                 interceptor.intercept(conf);
@@ -67,7 +70,15 @@ public class CheckInterceptorManager {
                     interceptor.intercept(conf);
                 }
             }
-            archiveConfService.updateArchiveConfStatus(conf.getId(), ArchiveConfStatus.CHECKED_SUCCESS);
+
+            Map<String, Object> archiveMap = ArchiveContextHolder.getArchiveMap();
+            Long count1 = (Long) archiveMap.get(ArchiveConstant.COUNT_SOURCE);
+            conf.setSourceTotalSize(count1);
+            if (ArchiveConfMode.ARCHIVE.name().equalsIgnoreCase(conf.getConfMode())){
+                Long count2 = (Long) archiveMap.get(ArchiveConstant.COUNT_SOURCE);
+                conf.setTargetTotalSize(count2);
+            }
+            archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.CHECKED_SUCCESS);
              // 所有拦截器执行完毕，提交事务
             //transactionManager.commit(transactionStatus);
         } catch (Exception e) {
@@ -84,7 +95,7 @@ public class CheckInterceptorManager {
             }
             taskLog.setErrorInfo(ex);
             archiveLogService.saveArchiveLog(taskLog);
-            archiveConfService.updateArchiveConfStatusFailed(conf.getId(), ArchiveConfStatus.CHECKED_FAILED);
+            archiveConfService.updateArchiveConfStatusFailed(conf, ArchiveConfStatus.CHECKED_FAILED);
 
 
             throw new ArchiverCheckException("配置校验出错: " + ex);

@@ -1,11 +1,9 @@
 package com.small.archive.service.task;
 
-import com.small.archive.core.check.ArchiveCheckService;
 import com.small.archive.core.convertask.ArchiveConfToTaskService;
 import com.small.archive.core.emuns.ArchiveConfStatus;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.pojo.ArchiveConf;
-import com.small.archive.service.ArchiveConfService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,11 +30,8 @@ public class ArchiveConfConvertTask {
     private ArchiveDao archiveDao;
 
     @Autowired
-    private ArchiveCheckService archiveCheckService;
-    @Autowired
     private ArchiveConfToTaskService archiveConfToTaskService;
-    @Autowired
-    private ArchiveConfService archiveConfService;
+
 
 
     @Transactional

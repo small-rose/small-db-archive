@@ -1,5 +1,6 @@
 package com.small.archive.dao;
 
+import com.small.archive.core.emuns.ArchiveConfMode;
 import com.small.archive.core.emuns.ArchiveConfStatus;
 import com.small.archive.core.emuns.ArchiveTaskStatus;
 import com.small.archive.pojo.ArchiveConf;
@@ -65,18 +66,27 @@ public class ArchiveDao {
     }
 
 
-    public int updateArchiveConfStatus(long id, ArchiveConfStatus confStatus) {
-        ArchiveConf conf = null;
+    public int updateArchiveConfStatus(ArchiveConf conf, ArchiveConfStatus confStatus) {
+        ArchiveConf confRecord = null;
         try {
-             conf = queryArchiveConfById(id, confStatus);
+            confRecord = queryArchiveConfById(conf.getId(), confStatus);
         }catch (EmptyResultDataAccessException e){
             log.info("没有查到CHECKING配置，ARCHIVE_CONF即将更新到"+confStatus.getStatus());
         }
-        if (!ObjectUtils.isEmpty(conf)){
+        if (!ObjectUtils.isEmpty(confRecord)){
             return 1;
         }
-        String sql = " update ARCHIVE_CONF t set t.conf_status = '"+confStatus.getStatus()+"',update_time = sysdate  where t.id = "+id ;
-        return jdbcTemplate.update(sql);
+        StringBuffer sb = new StringBuffer("update ARCHIVE_CONF t set t.conf_status = ");
+        sb.append(" '").append(confStatus.getStatus()).append("' ");
+        if (ArchiveConfStatus.CHECKED_SUCCESS.getDesc().equals(confStatus)){
+            sb.append(" , t.source_total_size = ").append(conf.getSourceTotalSize());
+            if (ArchiveConfMode.ARCHIVE.name().equalsIgnoreCase(conf.getConfMode())){
+                sb.append(" , t.target_total_size = ").append(conf.getTargetTotalSize());
+            }
+        }
+        sb.append(" , update_time = sysdate  where t.id = ").append(conf.getId()) ;
+        log.info(">>> update conf >>> " + sb.toString());
+        return jdbcTemplate.update(sb.toString());
     }
 
     public int updateArchiveConf(ArchiveConf conf) {

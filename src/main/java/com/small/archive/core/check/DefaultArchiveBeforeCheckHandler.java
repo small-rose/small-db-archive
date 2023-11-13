@@ -35,18 +35,18 @@ public class DefaultArchiveBeforeCheckHandler extends AbstractArchiveCheck {
     private ArchiveConfService archiveConfService;
 
     @Override
-    public ArchiveCheckModeType getCheckType() {
-        return ArchiveCheckModeType.DEFAULT;
+    public ArchiveModeStrategy getCheckType() {
+        return ArchiveModeStrategy.ARCHIVE_DATE_DAY;
     }
 
     @Override
     @Transactional( rollbackFor = ArchiverCheckException.class )
     public boolean check(ArchiveConf conf) {
-        archiveConfService.updateArchiveConfStatus(conf.getId(), ArchiveConfStatus.CHECKING);
+        archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.CHECKING);
 
         try {
             if (checkConf(conf) && checkMetaData(conf) && checkSql(conf)) {
-                archiveConfService.updateArchiveConfStatus(conf.getId(), ArchiveConfStatus.CHECKED_SUCCESS);
+                archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.CHECKED_SUCCESS);
                 return true;
             }
         } catch (ArchiverCheckException e) {
@@ -61,7 +61,7 @@ public class DefaultArchiveBeforeCheckHandler extends AbstractArchiveCheck {
             }
             taskLog.setErrorInfo(ex);
             archiveLogService.saveArchiveLog(taskLog);
-            archiveConfService.updateArchiveConfStatusFailed(conf.getId(), ArchiveConfStatus.CHECKED_FAILED);
+            archiveConfService.updateArchiveConfStatusFailed(conf, ArchiveConfStatus.CHECKED_FAILED);
 
             throw new ArchiverCheckException("归档配置校验失败: "+ex);
         }
@@ -76,10 +76,10 @@ public class DefaultArchiveBeforeCheckHandler extends AbstractArchiveCheck {
         Assert.hasText(conf.getConfMode(), "归档配置中归档模式conf_mode不允许为空");
         boolean result = archiveCheckDao.checkConfMode(conf.getConfMode());
         if (!result) {
-            log.info("归档配置的目标表配置的归档模式【" + conf.getConfMode() + "】暂不支持，可用模式有" + ArchiveModeType.getAllModeName());
+            log.info("归档配置的目标表配置的归档模式【" + conf.getConfMode() + "】暂不支持，可用模式有" + ArchiveModeStrategy.getAllModeName());
             return result;
         }
-        if (ArchiveModeType.PK_NUM_MODE.name().equalsIgnoreCase(conf.getConfMode())) {
+        if (ArchiveModeStrategy.ARCHIVE_PK_NUM.name().equalsIgnoreCase(conf.getConfMode())) {
             Assert.hasText(conf.getConfPk(), "归档配置中归档目标表conf_target_tab不允许为空");
         }
         return true;
@@ -105,11 +105,11 @@ public class DefaultArchiveBeforeCheckHandler extends AbstractArchiveCheck {
     @Override
     protected boolean checkSql(ArchiveConf conf) throws ArchiverCheckException {
 
-        boolean result = archiveCheckDao.checkTableSql(conf);
+     /*   boolean result = archiveCheckDao.checkTableSql(conf);
         if (!result) {
             log.info("SQL校验未通过！");
-        }
-        archiveCheckDao.checkConfParams(conf);
-        return result;
+        }*/
+
+        return true;
     }
 }

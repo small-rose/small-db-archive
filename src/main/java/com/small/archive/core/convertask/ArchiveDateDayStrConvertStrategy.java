@@ -3,7 +3,7 @@ package com.small.archive.core.convertask;
 import com.small.archive.core.constant.ArchiveConstant;
 import com.small.archive.core.context.ArchiveContextHolder;
 import com.small.archive.core.emuns.ArchiveConfStatus;
-import com.small.archive.core.emuns.ArchiveModeType;
+import com.small.archive.core.emuns.ArchiveModeStrategy;
 import com.small.archive.core.emuns.ArchiveTaskStatus;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.dao.ArchiveTaskDao;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class PkNumberConvertTaskStrategy implements ArchiveConfConvert {
+public class ArchiveDateDayStrConvertStrategy implements ArchiveConfConvert {
 
     @Autowired
     private ArchiveDao archiveDao;
@@ -46,8 +46,8 @@ public class PkNumberConvertTaskStrategy implements ArchiveConfConvert {
     private ArchiveSqlService archiveSqlService;
 
     @Override
-    public ArchiveModeType getMode() {
-        return ArchiveModeType.PK_NUM_MODE;
+    public ArchiveModeStrategy getMode() {
+        return ArchiveModeStrategy.ARCHIVE_DATE_DAY;
     }
 
     @Override

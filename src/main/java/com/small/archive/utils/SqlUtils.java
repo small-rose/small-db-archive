@@ -21,8 +21,8 @@ public class SqlUtils {
     public static String buildCheckSelectSql(String tableName, String whereStr) {
         StringBuffer sb = new StringBuffer();
         sb.append("SELECT COUNT(1) FROM ( ");
-        sb.append("SELECT * FROM ").append(tableName).append(" ").append(whereStr);
-        sb.append(") WHERE ROWNUM <=1 ");
+        sb.append("SELECT DISTINCT * FROM ").append(tableName).append(" ").append(whereStr);
+        sb.append(")  ");
         return sb.toString();
     }
 

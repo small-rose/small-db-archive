@@ -1,6 +1,6 @@
 package com.small.archive.core.convertask;
 
-import com.small.archive.core.emuns.ArchiveModeType;
+import com.small.archive.core.emuns.ArchiveModeStrategy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class ArchiveConvertFactory {
     List<ArchiveConfConvert> confConvertList ;
 
 
-    public ArchiveConfConvert getConvertTaskModeService(ArchiveModeType convertMode) {
+    public ArchiveConfConvert getConvertTaskModeService(ArchiveModeStrategy convertMode) {
 
         return confConvertList.stream().filter(s->(convertMode.equals(s.getMode()))).findFirst().get();
     }

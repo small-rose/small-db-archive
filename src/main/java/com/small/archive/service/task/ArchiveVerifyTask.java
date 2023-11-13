@@ -3,9 +3,9 @@ package com.small.archive.service.task;
 import com.small.archive.core.emuns.ArchiveConfStatus;
 import com.small.archive.core.emuns.ArchiveTaskStatus;
 import com.small.archive.core.verify.ArchiveTaskVerifyService;
-import com.small.archive.dao.ArchiveDao;
 import com.small.archive.pojo.ArchiveConf;
 import com.small.archive.pojo.ArchiveConfDetailTask;
+import com.small.archive.service.ArchiveConfService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class ArchiveVerifyTask {
 
 
     @Autowired
-    private ArchiveDao archiveDao;
+    private ArchiveConfService archiveConfService;
 
     @Autowired
     private ArchiveTaskVerifyService archiveTaskVerifyService;
@@ -39,14 +39,14 @@ public class ArchiveVerifyTask {
 
         ArchiveConf query = new ArchiveConf();
         query.setConfStatus(ArchiveConfStatus.MIGRATED.getStatus());
-        List<ArchiveConf> archiveConfs = archiveDao.queryArchiveConfList(query);
+        List<ArchiveConf> archiveConfs = archiveConfService.queryArchiveConfList(query);
         if (CollectionUtils.isEmpty(archiveConfs)) {
             log.info(">>> 归档校对任务 没有找到搬运完成配置，不执行数据搬运");
             return;
         }
         for (ArchiveConf conf : archiveConfs) {
-            archiveDao.updateArchiveConfStatus(conf.getId(), ArchiveConfStatus.VERIFYING);
-            List<ArchiveConfDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.MIGRATED);
+            archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.VERIFYING);
+            List<ArchiveConfDetailTask> taskList = archiveConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.MIGRATED);
             if (CollectionUtils.isEmpty(taskList)) {
                 log.info(">>> 任务[ "+conf.getConfDesc() + " ] 未检测到可校验的归档任务！");
                 continue;
@@ -59,7 +59,7 @@ public class ArchiveVerifyTask {
             boolean check = archiveTaskVerifyService.executeCheckVerify(conf);
 
             if (check) {
-                archiveDao.updateArchiveConfStatus(conf.getId(), ArchiveConfStatus.VERIFIED);
+                archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.VERIFIED);
             }
         }
 

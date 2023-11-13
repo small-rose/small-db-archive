@@ -1,6 +1,6 @@
 package com.small.archive.core.convertask;
 
-import com.small.archive.core.emuns.ArchiveModeType;
+import com.small.archive.core.emuns.ArchiveModeStrategy;
 import com.small.archive.pojo.ArchiveConf;
 /**
  * @description: TODO 功能角色说明：
@@ -11,7 +11,7 @@ import com.small.archive.pojo.ArchiveConf;
  */
 public interface ArchiveConfConvert {
 
-    public ArchiveModeType getMode();
+    public ArchiveModeStrategy getMode();
 
     public boolean confConvertTask(ArchiveConf conf);
 
