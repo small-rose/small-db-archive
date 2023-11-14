@@ -2,7 +2,7 @@ package com.small.archive.core.transfer;
 
 import com.small.archive.core.emuns.ArchiveTaskStatus;
 import com.small.archive.dao.ArchiveTaskDao;
-import com.small.archive.pojo.ArchiveConfDetailTask;
+import com.small.archive.pojo.ArchiveJobDetailTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,7 +23,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class ArchiveTaskService {
+public class ArchiveJobTaskService {
 
     @Autowired
     private ArchiveTaskDao archiveTaskDao;
@@ -49,24 +49,26 @@ public class ArchiveTaskService {
         return total ;
     }
 
-
-    public int updateArchiveConfDetailTaskStatus(ArchiveConfDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    @Transactional
+    public int updateJobTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
         return archiveTaskDao.updateArchiveConfDetailTaskStatus(acTask, taskStatus);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public int updateArchiveConfDetailTaskStatusError(ArchiveConfDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    public int updateJobTaskStatusError(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
         return archiveTaskDao.updateArchiveConfDetailTaskStatus(acTask, taskStatus);
     }
 
  
 
 
-    public int updateVerifyTaskStatus(ArchiveConfDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    public int updateVerifyTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
         return archiveTaskDao.updateVerifyTaskStatus(acTask, taskStatus);
     }
 
     public int deleteSouceTab(String delSql) {
         return archiveTaskDao.deleteSouceTab(delSql);
     }
+
+
 }

@@ -6,7 +6,7 @@ package com.small.archive.core.emuns;
  * @date: 2023/11/12 012 0:22
  * @version: v1.0
  */
-public enum ArchiveLogStatus {
+public enum ArchiveLogResult {
 
     SUCCESS("S","归档任务成功") ,
     ERROR("E","归档任务出错");
@@ -22,13 +22,13 @@ public enum ArchiveLogStatus {
         return desc;
     }
 
-    ArchiveLogStatus(String status, String desc) {
+    ArchiveLogResult(String status, String desc) {
         this.status = status;
         this.desc = desc;
     }
 
-    public static ArchiveLogStatus getParamType(String confMode) {
-         for (ArchiveLogStatus modeType : ArchiveLogStatus.values()){
+    public static ArchiveLogResult getParamType(String confMode) {
+         for (ArchiveLogResult modeType : ArchiveLogResult.values()){
             if (modeType.status.equals(confMode)){
                 return modeType;
             }

@@ -1,7 +1,11 @@
 package com.small.archive.task;
 
 import com.small.archive.base.SmallDbArchiveAppTests;
-import com.small.archive.service.task.*;
+import com.small.archive.schedule.ArchiveConfCheckTask;
+import com.small.archive.schedule.ArchiveConfConvertTask;
+import com.small.archive.schedule.ArchiveDeleteTask;
+import com.small.archive.schedule.ArchiveTransferTask;
+import com.small.archive.schedule.ArchiveVerifyTask;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

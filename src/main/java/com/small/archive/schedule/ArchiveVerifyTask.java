@@ -1,11 +1,11 @@
-package com.small.archive.service.task;
+package com.small.archive.schedule;
 
-import com.small.archive.core.emuns.ArchiveConfStatus;
+import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.core.emuns.ArchiveTaskStatus;
 import com.small.archive.core.verify.ArchiveTaskVerifyService;
-import com.small.archive.pojo.ArchiveConf;
-import com.small.archive.pojo.ArchiveConfDetailTask;
-import com.small.archive.service.ArchiveConfService;
+import com.small.archive.pojo.ArchiveJobConfig;
+import com.small.archive.pojo.ArchiveJobDetailTask;
+import com.small.archive.service.ArchiveJobConfService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class ArchiveVerifyTask {
 
 
     @Autowired
-    private ArchiveConfService archiveConfService;
+    private ArchiveJobConfService archiveJobConfService;
 
     @Autowired
     private ArchiveTaskVerifyService archiveTaskVerifyService;
@@ -37,21 +37,21 @@ public class ArchiveVerifyTask {
 
     public void archiveTaskVerify() {
 
-        ArchiveConf query = new ArchiveConf();
-        query.setConfStatus(ArchiveConfStatus.MIGRATED.getStatus());
-        List<ArchiveConf> archiveConfs = archiveConfService.queryArchiveConfList(query);
-        if (CollectionUtils.isEmpty(archiveConfs)) {
+        ArchiveJobConfig query = new ArchiveJobConfig();
+        query.setJobStatus(ArchiveJobStatus.MIGRATED_SUCCESS.getStatus());
+        List<ArchiveJobConfig> archiveJobConfigs = archiveJobConfService.queryArchiveConfList(query);
+        if (CollectionUtils.isEmpty(archiveJobConfigs)) {
             log.info(">>> 归档校对任务 没有找到搬运完成配置，不执行数据搬运");
             return;
         }
-        for (ArchiveConf conf : archiveConfs) {
-            archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.VERIFYING);
-            List<ArchiveConfDetailTask> taskList = archiveConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.MIGRATED);
+        for (ArchiveJobConfig conf : archiveJobConfigs) {
+            archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.VERIFYING);
+            List<ArchiveJobDetailTask> taskList = archiveJobConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.MIGRATED);
             if (CollectionUtils.isEmpty(taskList)) {
-                log.info(">>> 任务[ "+conf.getConfDesc() + " ] 未检测到可校验的归档任务！");
+                log.info(">>> 任务[ "+conf.getJobName() + " ] 未检测到可校验的归档任务！");
                 continue;
             }
-            for (ArchiveConfDetailTask task : taskList) {
+            for (ArchiveJobDetailTask task : taskList) {
                 //数据校对
                 archiveTaskVerifyService.executeVerify(conf, task);
             }
@@ -59,7 +59,7 @@ public class ArchiveVerifyTask {
             boolean check = archiveTaskVerifyService.executeCheckVerify(conf);
 
             if (check) {
-                archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.VERIFIED);
+                archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.VERIFY_SUCCESS);
             }
         }
 

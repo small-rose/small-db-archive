@@ -1,6 +1,6 @@
 package com.small.archive.core.check;
 
-import com.small.archive.core.emuns.ArchiveModeStrategy;
+import com.small.archive.core.emuns.ArchiveStrategyEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,15 +15,14 @@ import java.util.List;
  */
 
 @Component
-public class ArchiveCheckFactory {
+public class ArchiveModeCheckFactory {
 
     @Autowired
-    private List<ArchiveBeforeCheck> checkList ;
+    private List<ArchiveModeCheck> checkList ;
 
 
-    public ArchiveBeforeCheck getArchiveBeforeCheckStrategy(ArchiveModeStrategy checkRuleName) {
-
-        return checkList.stream().filter(s->(checkRuleName.equals(s.getCheckType()))).findFirst().get();
+    public ArchiveModeCheck getArchiveModeCheckStrategy(ArchiveStrategyEnum strategyEnum) {
+        return checkList.stream().filter(s->(strategyEnum.equals(s.getArchiveStrategy()))).findFirst().get();
     }
 
 }

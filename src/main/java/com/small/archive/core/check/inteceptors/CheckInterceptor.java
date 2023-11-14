@@ -1,7 +1,7 @@
 package com.small.archive.core.check.inteceptors;
 
-import com.small.archive.core.emuns.ArchiveConfMode;
-import com.small.archive.pojo.ArchiveConf;
+import com.small.archive.core.emuns.ArchiveJobMode;
+import com.small.archive.pojo.ArchiveJobConfig;
 
 /**
  * @Project: small-db-archive
@@ -13,11 +13,19 @@ import com.small.archive.pojo.ArchiveConf;
  */
 public interface CheckInterceptor {
 
+    /**
+     * 检查对应的拦截器是否支持传入的配置模式的 校验策略
+     * @param type
+     * @return
+     */
+    public boolean supports(ArchiveJobMode type);
 
-    public boolean supports(ArchiveConfMode type);
-
-
-    public boolean intercept(ArchiveConf conf);
+    /**
+     * 执行拦截器功能
+     * @param conf
+     * @return
+     */
+    public boolean intercept(ArchiveJobConfig conf);
 
 
 }

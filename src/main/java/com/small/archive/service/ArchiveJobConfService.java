@@ -1,10 +1,11 @@
 package com.small.archive.service;
 
-import com.small.archive.core.emuns.ArchiveConfStatus;
+import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.core.emuns.ArchiveTaskStatus;
 import com.small.archive.dao.ArchiveDao;
-import com.small.archive.pojo.ArchiveConf;
-import com.small.archive.pojo.ArchiveConfDetailTask;
+import com.small.archive.pojo.ArchiveJobConfParam;
+import com.small.archive.pojo.ArchiveJobConfig;
+import com.small.archive.pojo.ArchiveJobDetailTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import java.util.List;
 /**
  * @Project: small-db-archive
  * @Author: 张小菜
- * @Description: [ ArchiveConfService ] 说明： 无
+ * @Description: [ ArchiveJobConfService ] 说明： 无
  * @Function: 功能描述： 无
  * @Date: 2023/11/12 012 19:49
  * @Version: v1.0
@@ -24,32 +25,37 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ArchiveConfService {
+public class ArchiveJobConfService {
 
     @Autowired
     private ArchiveDao archiveDao ;
 
-    public List<ArchiveConf> queryArchiveConfList(ArchiveConf query) {
+    public List<ArchiveJobConfig> queryArchiveConfList(ArchiveJobConfig query) {
         return archiveDao.queryArchiveConfList(query);
     }
 
 
-    public List<ArchiveConfDetailTask> queryArchiveConfDetailTaskList(ArchiveConf conf, ArchiveTaskStatus prepare) {
+    public List<ArchiveJobDetailTask> queryArchiveConfDetailTaskList(ArchiveJobConfig conf, ArchiveTaskStatus prepare) {
         return archiveDao.queryArchiveConfDetailTaskList(conf,prepare);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public int updateArchiveConf(ArchiveJobConfig conf){
+        return archiveDao.updateArchiveConf(conf);
+    }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public int updateArchiveConfStatus(ArchiveConf conf, ArchiveConfStatus confStatus){
+    public int updateArchiveConfStatus(ArchiveJobConfig conf, ArchiveJobStatus confStatus){
         return archiveDao.updateArchiveConfStatus(conf, confStatus);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public int updateArchiveConfStatusFailed(ArchiveConf conf, ArchiveConfStatus checkedFailed) {
+    public int updateArchiveConfStatusFailed(ArchiveJobConfig conf, ArchiveJobStatus checkedFailed) {
         return archiveDao.updateArchiveConfStatus(conf, checkedFailed);
     }
 
 
-
-
+    public List<ArchiveJobConfParam> queryArchiveConfParamList() {
+        return archiveDao.queryArchiveConfParamList();
+    }
 }

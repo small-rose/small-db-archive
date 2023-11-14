@@ -1,10 +1,11 @@
 package com.small.archive.core.transfer;
 
-import com.small.archive.core.emuns.ArchiveConfStatus;
+import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.core.emuns.ArchiveTaskStatus;
-import com.small.archive.pojo.ArchiveConf;
-import com.small.archive.pojo.ArchiveConfDetailTask;
-import com.small.archive.service.ArchiveConfService;
+import com.small.archive.exception.DataArchiverException;
+import com.small.archive.pojo.ArchiveJobConfig;
+import com.small.archive.pojo.ArchiveJobDetailTask;
+import com.small.archive.service.ArchiveJobConfService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,36 +27,38 @@ import java.util.List;
 public class ArchiveTransferConfService implements ConfArchiver {
 
     @Autowired
-    private ArchiveConfService archiveConfService ;
+    private ArchiveJobConfService archiveJobConfService;
     @Autowired
-    private ArchiveTransferService archiveTransferService ;
+    private ArchiveTransferService archiveTransferService;
 
 
     @Override
-    @Transactional
-    public void executeConfArchive(ArchiveConf conf) {
+    @Transactional( rollbackFor = DataArchiverException.class )
+    public void executeConfArchive(ArchiveJobConfig conf) {
         try {
             // 检测可搬运任务
-            List<ArchiveConfDetailTask> taskList = archiveConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.PREPARE);
-            if (CollectionUtils.isEmpty(taskList)){
+            List<ArchiveJobDetailTask> taskList = archiveJobConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.PREPARE);
+            if (CollectionUtils.isEmpty(taskList)) {
                 log.info("未检测到可执行[PREPARE]的归档任务！");
                 return;
             }
 
             // 标记搬运中完成
-            archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.MIGRATING);
+            archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.MIGRATING);
 
-            for (ArchiveConfDetailTask task : taskList) {
+            for (ArchiveJobDetailTask task : taskList) {
                 //数据搬运，任务级事务
                 archiveTransferService.executeArchive(task);
             }
             boolean check = archiveTransferService.executeCheckArchive(conf);
             if (check) {
                 // 标记搬运完成
-                archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.MIGRATED);
+                archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.MIGRATED_SUCCESS);
             }
-        }catch (Exception e){
-            throw e;
+        } catch (Exception e) {
+            // 标记搬运失败
+            archiveJobConfService.updateArchiveConfStatusFailed(conf, ArchiveJobStatus.MIGRATED_FAILED);
+            throw new DataArchiverException("归档作业数据搬运失败" + e.getMessage());
         }
     }
 }

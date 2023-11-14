@@ -1,11 +1,11 @@
 package com.small.archive.dao;
 
-import com.small.archive.core.emuns.ArchiveConfMode;
-import com.small.archive.core.emuns.ArchiveConfStatus;
+import com.small.archive.core.emuns.ArchiveJobMode;
+import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.core.emuns.ArchiveTaskStatus;
-import com.small.archive.pojo.ArchiveConf;
-import com.small.archive.pojo.ArchiveConfDetailTask;
-import com.small.archive.pojo.ArchiveConfParam;
+import com.small.archive.pojo.ArchiveJobConfParam;
+import com.small.archive.pojo.ArchiveJobConfig;
+import com.small.archive.pojo.ArchiveJobDetailTask;
 import com.small.archive.service.jdbc.JdbcTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,55 +33,55 @@ public class ArchiveDao {
     @Autowired
     private JdbcTemplate jdbcTemplate ;
 
-    public ArchiveConf queryArchiveConfById(long id, ArchiveConfStatus confStatus){
-        String sql = " select * from ARCHIVE_CONF a where a.id = "+id+" and a.conf_status='"+confStatus.getStatus()+"' ";
-        return jdbcTemplateService.queryForObject(sql, ArchiveConf.class);
+    public ArchiveJobConfig queryArchiveConfById(long id, ArchiveJobStatus confStatus){
+        String sql = " select * from ARCHIVE_JOB_CONF a where a.id = "+id+" and a.job_status='"+confStatus.getStatus()+"' ";
+        return jdbcTemplateService.queryForObject(sql, ArchiveJobConfig.class);
     }
-    public List<ArchiveConf> queryArchiveConfList(ArchiveConf conf){
-        String sql = " select * from ARCHIVE_CONF a where a.conf_status = '"+conf.getConfStatus()+"' and if_valid=1 order by conf_priority desc ";
-        return jdbcTemplateService.queryForList(sql, ArchiveConf.class);
-    }
-
-
-    public List<ArchiveConfParam> queryArchiveConfParamList(){
-        String sql = " select * from ARCHIVE_CONF_PARAM a where if_valid=1 order by a.confId ";
-        return jdbcTemplateService.queryForList(sql, ArchiveConfParam.class);
+    public List<ArchiveJobConfig> queryArchiveConfList(ArchiveJobConfig conf){
+        String sql = " select * from ARCHIVE_JOB_CONFIG a where a.job_status = '"+conf.getJobStatus()+"' and if_valid=1 order by conf_priority desc ";
+        return jdbcTemplateService.queryForList(sql, ArchiveJobConfig.class);
     }
 
 
-    public List<ArchiveConfParam> queryArchiveConfParamListByConfId(long confId){
-        String sql = " select * from ARCHIVE_CONF_PARAM a where a.conf_status = '1' and a.conf_id="+confId+" order by a.confId ";
-        return jdbcTemplateService.queryForList(sql, ArchiveConfParam.class);
-    }
-
-    public List<ArchiveConfDetailTask> queryArchiveConfDetailTaskList(ArchiveConf conf, ArchiveTaskStatus taskStatus){
-        String sql = " select t.* from  ARCHIVE_CONF_DETAIL_TASK t  where t.conf_id "+conf.getId()+
-                " and a.task_batch_no = '"+conf.getCurrentBatchNo()+"' a.task_status = '"+taskStatus.getStatus()+"' order by a.task_order ";
-        return jdbcTemplateService.queryForList(sql, ArchiveConfDetailTask.class);
-    }
-
-    public ArchiveConf queryArchiveConfByTask(ArchiveConfDetailTask task){
-        String sql = " select t.* from  ARCHIVE_CONF t  where t.id = "+task.getConfId() ;
-        return jdbcTemplate.queryForObject(sql, ArchiveConf.class);
+    public List<ArchiveJobConfParam> queryArchiveConfParamList(){
+        String sql = " select * from ARCHIVE_JOB_CONFIG_PARAM a where if_valid=1 order by a.confId ";
+        return jdbcTemplateService.queryForList(sql, ArchiveJobConfParam.class);
     }
 
 
-    public int updateArchiveConfStatus(ArchiveConf conf, ArchiveConfStatus confStatus) {
-        ArchiveConf confRecord = null;
+    public List<ArchiveJobConfParam> queryArchiveConfParamListByConfId(long confId){
+        String sql = " select * from ARCHIVE_JOB_CONFIG_PARAM a where a.job_status = '1' and a.conf_id="+confId+" order by a.confId ";
+        return jdbcTemplateService.queryForList(sql, ArchiveJobConfParam.class);
+    }
+
+    public List<ArchiveJobDetailTask> queryArchiveConfDetailTaskList(ArchiveJobConfig conf, ArchiveTaskStatus taskStatus){
+        String sql = " select t.* from  ARCHIVE_JOB_CONFIG_DETAIL_TASK t  where t.job_id "+conf.getId()+
+                " and a.job_batch_no = '"+conf.getJobBatchNo()+"' a.task_status = '"+taskStatus.getStatus()+"' order by a.task_order ";
+        return jdbcTemplateService.queryForList(sql, ArchiveJobDetailTask.class);
+    }
+
+    public ArchiveJobConfig queryArchiveConfByTask(ArchiveJobDetailTask task){
+        String sql = " select t.* from  ARCHIVE_JOB_CONFIG t  where t.id = "+task.getJobId() ;
+        return jdbcTemplate.queryForObject(sql, ArchiveJobConfig.class);
+    }
+
+
+    public int updateArchiveConfStatus(ArchiveJobConfig conf, ArchiveJobStatus confStatus) {
+        ArchiveJobConfig confRecord = null;
         try {
             confRecord = queryArchiveConfById(conf.getId(), confStatus);
         }catch (EmptyResultDataAccessException e){
-            log.info("没有查到CHECKING配置，ARCHIVE_CONF即将更新到"+confStatus.getStatus());
+            log.info("没有查到CHECKING配置，ARCHIVE_JOB_CONFIG即将更新到"+confStatus.getStatus());
         }
         if (!ObjectUtils.isEmpty(confRecord)){
             return 1;
         }
-        StringBuffer sb = new StringBuffer("update ARCHIVE_CONF t set t.conf_status = ");
+        StringBuffer sb = new StringBuffer("update archive_job_config t set t.job_status = ");
         sb.append(" '").append(confStatus.getStatus()).append("' ");
-        if (ArchiveConfStatus.CHECKED_SUCCESS.getDesc().equals(confStatus)){
-            sb.append(" , t.source_total_size = ").append(conf.getSourceTotalSize());
-            if (ArchiveConfMode.ARCHIVE.name().equalsIgnoreCase(conf.getConfMode())){
-                sb.append(" , t.target_total_size = ").append(conf.getTargetTotalSize());
+        if (ArchiveJobStatus.CHECKED_SUCCESS.getDesc().equals(confStatus)){
+            sb.append(" , t.total_expect_size = ").append(conf.getTotalExpectSize());
+            if (ArchiveJobMode.ARCHIVE.name().equalsIgnoreCase(conf.getJobMode())){
+                sb.append(" , t.target_archived_size = ").append(conf.getTotalArchivedSize());
             }
         }
         sb.append(" , update_time = sysdate  where t.id = ").append(conf.getId()) ;
@@ -89,9 +89,9 @@ public class ArchiveDao {
         return jdbcTemplate.update(sb.toString());
     }
 
-    public int updateArchiveConf(ArchiveConf conf) {
-        String sql = "update ARCHIVE_CONF a set  a.conf_Status= ? ," +
-                " current_batch_no = ? , update_time = sysdate  where id = ? ";
-        return jdbcTemplate.update(sql, conf.getConfStatus(), conf.getCurrentBatchNo(), conf.getId());
+    public int updateArchiveConf(ArchiveJobConfig conf) {
+        String sql = "update ARCHIVE_JOB_CONFIG a set  a.job_status= ? ," +
+                " job_batch_no = ? , update_time = sysdate  where id = ? ";
+        return jdbcTemplate.update(sql, conf.getJobStatus(), conf.getJobBatchNo(), conf.getId());
     }
 }

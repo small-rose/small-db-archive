@@ -12,27 +12,28 @@ import java.util.Date;
  * @version: v1.0
  */
 @Data
-public class ArchiveConfTaskLog {
+public class ArchiveTaskLog {
 
     private long id ;
-    private long confId ;
+    private long jobId ;
     private long taskId ;
-    private String currentBatchNo ;
+    private String jobBatchNo ;
     private String taskPhase ;
-    private String execResult ;
+    private String taskResult ;
     private Date createTime ;
     private String errorInfo ;
     private String ext1 ;
     private String ext2 ;
 
-    public ArchiveConfTaskLog(){
+
+    public ArchiveTaskLog(){
 
     }
 
-    public ArchiveConfTaskLog(ArchiveConfDetailTask task) {
-        this.confId = task.getConfId();
+    public ArchiveTaskLog(ArchiveJobDetailTask task) {
+        this.jobId = task.getJobId();
         this.taskId = task.getId();
-        this.currentBatchNo = task.getCurrentBatchNo();
+        this.jobBatchNo = task.getJobBatchNo();
         this.createTime = new Date();
     }
 }

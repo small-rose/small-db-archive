@@ -6,10 +6,10 @@ package com.small.archive.core.emuns;
  * @date: 2023/11/12 012 0:22
  * @version: v1.0
  */
-public enum ArchiveModeStrategy {
+public enum ArchiveStrategyEnum {
 
-    ARCHIVE_PK_NUM("ARCHIVE_PK_NUM"),
-    ARCHIVE_PK_STR("ARCHIVE_PK_STR"),
+    ARCHIVE_PK_NUMBER("ARCHIVE_PK_NUMBER"),
+    ARCHIVE_PK_STRING("ARCHIVE_PK_STRING"),
     ARCHIVE_DATE_DAY("ARCHIVE_DATE_DAY"),
     ARCHIVE_DATE_MOTH("ARCHIVE_DATE_MOTH"),
     ARCHIVE_DATE_YEAR("ARCHIVE_DATE_YEAR"),
@@ -17,12 +17,12 @@ public enum ArchiveModeStrategy {
 
     private String mode ;
 
-    ArchiveModeStrategy(String mode) {
+    ArchiveStrategyEnum(String mode) {
         this.mode = mode;
     }
 
-    public static ArchiveModeStrategy getMode(String confMode) {
-         for (ArchiveModeStrategy modeType : ArchiveModeStrategy.values()){
+    public static ArchiveStrategyEnum getStrategy(String confMode) {
+         for (ArchiveStrategyEnum modeType : ArchiveStrategyEnum.values()){
             if (modeType.mode.equals(confMode)){
                 return modeType;
             }
@@ -32,7 +32,7 @@ public enum ArchiveModeStrategy {
 
     public static String getAllModeName() {
         StringBuffer sb = new StringBuffer("[");
-        for (ArchiveModeStrategy modeType : ArchiveModeStrategy.values()){
+        for (ArchiveStrategyEnum modeType : ArchiveStrategyEnum.values()){
             if (!modeType.name().equals(NULL_MODE.name())){
                 sb.append(modeType.name()).append(",");
             }

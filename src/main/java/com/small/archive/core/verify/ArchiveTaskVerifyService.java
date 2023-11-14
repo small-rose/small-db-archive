@@ -1,15 +1,15 @@
 package com.small.archive.core.verify;
 
-import com.small.archive.core.emuns.ArchiveLogPhase;
-import com.small.archive.core.emuns.ArchiveLogStatus;
+import com.small.archive.core.emuns.ArchiveJobPhase;
+import com.small.archive.core.emuns.ArchiveLogResult;
 import com.small.archive.core.emuns.ArchiveTaskStatus;
-import com.small.archive.core.transfer.ArchiveTaskService;
+import com.small.archive.core.transfer.ArchiveJobTaskService;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.exception.DataArchiverException;
-import com.small.archive.pojo.ArchiveConf;
-import com.small.archive.pojo.ArchiveConfDetailTask;
-import com.small.archive.pojo.ArchiveConfTaskLog;
-import com.small.archive.service.ArchiveLogService;
+import com.small.archive.pojo.ArchiveJobConfig;
+import com.small.archive.pojo.ArchiveJobDetailTask;
+import com.small.archive.pojo.ArchiveTaskLog;
+import com.small.archive.service.ArchiveTaskLogService;
 import com.small.archive.utils.DigestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Project: small-db-archive
@@ -36,37 +37,36 @@ import java.util.Set;
 public class ArchiveTaskVerifyService implements DataArchiverVerify {
 
     @Autowired
-    private ArchiveTaskService archiveTaskService;
+    private ArchiveJobTaskService archiveJobTaskService;
     @Autowired
     private ArchiveDao archiveDao;
 
     @Autowired
-    private ArchiveLogService archiveLogService;
+    private ArchiveTaskLogService archiveTaskLogService;
 
 
     @Override
     @Transactional( rollbackFor = DataArchiverException.class )
-    public void executeVerify(ArchiveConf conf, ArchiveConfDetailTask acTask) {
-        ArchiveConfTaskLog taskLog = new ArchiveConfTaskLog(acTask);
+    public void executeVerify(ArchiveJobConfig conf, ArchiveJobDetailTask acTask) {
+        ArchiveTaskLog taskLog = new ArchiveTaskLog(acTask);
 
         try {
-            taskLog.setConfId(acTask.getConfId());
+            taskLog.setJobId(acTask.getJobId());
             taskLog.setTaskId(acTask.getId());
-            taskLog.setTaskPhase(ArchiveLogPhase.VERIFY.getStatus());
+            taskLog.setTaskPhase(ArchiveJobPhase.VERIFY.getStatus());
             taskLog.setCreateTime(new Date());
 
 
             acTask.setVerifyStart(new Date());
-            acTask.setVerifyStart(null);
-            acTask.setVerifySize(null);
-            archiveTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatus.VERIFYING);
+            acTask.setVerifySize(0);
+            archiveJobTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatus.VERIFYING);
 
             String sql = acTask.getTaskSql();
             if (acTask.getExpectSize() != acTask.getActualSize()) {
                 throw new DataArchiverException("归档任务校验taskId= " + acTask.getId() + "搬运数据记录预期数量和实际数量不符，校验失败");
             }
-            List<Map<String, Object>> sourceList = archiveTaskService.querySourceList(sql);
-            List<Map<String, Object>> targetList = archiveTaskService.queryTargetList(sql);
+            List<Map<String, Object>> sourceList = archiveJobTaskService.querySourceList(sql);
+            List<Map<String, Object>> targetList = archiveJobTaskService.queryTargetList(sql);
             if (CollectionUtils.isEmpty(sourceList) || CollectionUtils.isEmpty(targetList)) {
                 throw new DataArchiverException("归档任务校验taskId= " + acTask.getId() + "根据SQL查询到的记录出现为空，校验失败");
             }
@@ -77,9 +77,10 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
                 throw new DataArchiverException("归档任务校验taskId= " + acTask.getId() + "根据搬运记录数和SQL查询记录数不相符，校验失败");
             }
             Set<String> columnsSet = sourceList.get(0).keySet();
-            String primaryKey = columnsSet.stream().filter(s -> s.equalsIgnoreCase(conf.getConfPk())).findFirst().get();
-            Map<String, String> sources = DigestUtils.messageDigestConvert(sourceList, primaryKey);
-            Map<String, String> targets = DigestUtils.messageDigestConvert(sourceList, primaryKey);
+            List<String> pkList = columnsSet.stream().filter(s -> conf.getJobColumns().contains(s)).map(String::toUpperCase).collect(Collectors.toList());
+
+            Map<String, String> sources = DigestUtils.messageDigestConvert(sourceList, pkList);
+            Map<String, String> targets = DigestUtils.messageDigestConvert(sourceList, pkList);
             boolean total1 = sources.keySet().containsAll(targets.keySet());
             boolean total2 = targets.keySet().containsAll(sources.keySet());
             if (!total1 || !total2) {
@@ -90,11 +91,11 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
 
             acTask.setVerifyEnd(new Date());
             acTask.setVerifySize(Long.valueOf(sources.size()));
-            archiveTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatus.VERIFIED);
+            archiveJobTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatus.VERIFIED);
         } catch (Exception e) {
             String ex = ExceptionUtils.getStackTrace(e);
 
-            taskLog.setExecResult(ArchiveLogStatus.ERROR.getStatus());
+            taskLog.setTaskResult(ArchiveLogResult.ERROR.getStatus());
             if (ex.length() > 2000) {
                 ex = ex.substring(0, 2000);
             }
@@ -105,7 +106,7 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
         } finally {
 
             try {
-                archiveLogService.saveArchiveLog(taskLog);
+                archiveTaskLogService.saveArchiveLog(taskLog);
                 log.info("执行归档数据校对日志保存成功！");
             } catch (Exception e) {
                 String message = ExceptionUtils.getMessage(e);
@@ -116,23 +117,23 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
     }
 
     @Override
-    public boolean executeCheckVerify(ArchiveConf conf) {
+    public boolean executeCheckVerify(ArchiveJobConfig conf) {
         try {
 
-            List<ArchiveConfDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.VERIFIED);
+            List<ArchiveJobDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.VERIFIED);
 
             if (CollectionUtils.isEmpty(taskList)) {
                 throw new DataArchiverException("归档任务总数据校对失败！还有未执行完成的任务");
             }
-            long totalSize = conf.getSourceTotalSize();
+            long totalSize = conf.getTotalExpectSize();
             long sum = taskList.stream().mapToLong(t -> t.getVerifySize()).sum();
             if (totalSize != sum) {
-                throw new DataArchiverException("归档任务总数据校对失败！当前批次【" + conf.getCurrentBatchNo() + "】归档数据总量对不上！");
+                throw new DataArchiverException("归档任务总数据校对失败！当前批次【" + conf.getJobBatchNo() + "】归档数据总量对不上！");
             }
             return true;
         } catch (Exception e) {
 
-            throw new DataArchiverException("归档任务总数据校对失败！当前批次【" + conf.getCurrentBatchNo() + "】归档数据总量对不上！");
+            throw new DataArchiverException("归档任务总数据校对失败！当前批次【" + conf.getJobBatchNo() + "】归档数据总量对不上！");
         }
     }
 

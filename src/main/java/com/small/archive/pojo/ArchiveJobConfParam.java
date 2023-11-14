@@ -13,21 +13,25 @@ import java.util.Date;
  * @version: v1.0
  */
 @Data
-public class ArchiveConfParam {
+public class ArchiveJobConfParam {
 
     private long id ;
-    private long confId ;
-
+    private long jobId ;
+    private String jobMode ;
     private String paramPk ;
     private String paramName ;
     private String paramType ;
+    private int paramConvert ;
     private String paramValue ;
     private String paramExtVal ;
     private String paramDesc ;
     private int paramOrder ;
+    private Date createTime ;
+    private Date updateTime ;
     private int ifValid ;
     private String ext1 ;
     private String ext2 ;
+
     private long paramValueInt ;
     private Date paramValueDate ;
 

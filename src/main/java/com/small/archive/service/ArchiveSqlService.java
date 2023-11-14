@@ -4,8 +4,8 @@ import com.small.archive.core.emuns.ArchiveParamType;
 import com.small.archive.dao.ArchiveCheckDao;
 import com.small.archive.dao.ArchiveTaskDao;
 import com.small.archive.exception.ArchiverCheckException;
-import com.small.archive.pojo.ArchiveConfDetailTask;
-import com.small.archive.pojo.ArchiveConfParam;
+import com.small.archive.pojo.ArchiveJobConfParam;
+import com.small.archive.pojo.ArchiveJobDetailTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +35,15 @@ public class ArchiveSqlService {
     @Autowired
     private ArchiveCheckDao archiveCheckDao ;
 
-    public List<ArchiveConfParam> calculateDateParams(List<ArchiveConfParam> noIdList) {
+    public List<ArchiveJobConfParam> calculateDateParams(List<ArchiveJobConfParam> noIdList) {
 
         if (CollectionUtils.isEmpty(noIdList)){
             return Collections.emptyList();
         }
-        ArchiveConfParam param = null;
-        List<ArchiveConfParam> resultList = new ArrayList<>();
-        for (ArchiveConfParam tmp : noIdList) {
-            param = new ArchiveConfParam();
+        ArchiveJobConfParam param = null;
+        List<ArchiveJobConfParam> resultList = new ArrayList<>();
+        for (ArchiveJobConfParam tmp : noIdList) {
+            param = new ArchiveJobConfParam();
             BeanUtils.copyProperties(tmp, param);
             if (ArchiveParamType.DATE.name().equalsIgnoreCase(tmp.getParamType())){
                 Date date = archiveTaskDao.queryForDate(tmp.getParamValue());
@@ -54,7 +54,7 @@ public class ArchiveSqlService {
         return resultList;
     }
 
-    public void checkTaskSql(String sql, ArchiveConfDetailTask task) {
+    public void checkTaskSql(String sql, ArchiveJobDetailTask task) {
         try {
             long nums  = archiveCheckDao.checkSql(sql);
             task.setExpectSize(nums);

@@ -1,9 +1,9 @@
-package com.small.archive.service.task;
+package com.small.archive.schedule;
 
-import com.small.archive.core.emuns.ArchiveConfStatus;
+import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.core.transfer.ArchiveTransferConfService;
 import com.small.archive.dao.ArchiveDao;
-import com.small.archive.pojo.ArchiveConf;
+import com.small.archive.pojo.ArchiveJobConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,14 +35,14 @@ public class ArchiveTransferTask {
 
     public void archiveTaskExec() {
 
-        ArchiveConf query = new ArchiveConf();
-        query.setConfStatus(ArchiveConfStatus.CONVERTED.getStatus());
-        List<ArchiveConf> acList = archiveDao.queryArchiveConfList(query);
+        ArchiveJobConfig query = new ArchiveJobConfig();
+        query.setJobStatus(ArchiveJobStatus.CONVERT_SUCCESS.getStatus());
+        List<ArchiveJobConfig> acList = archiveDao.queryArchiveConfList(query);
         if (CollectionUtils.isEmpty(acList)) {
             log.info("位检测到转换成功[CONVERTED]的任务，无法进行数据搬运!");
             return;
         }
-        for (ArchiveConf conf : acList) {
+        for (ArchiveJobConfig conf : acList) {
             archiveTransferConfService.executeConfArchive(conf);
         }
         log.info("本次扫扫描执行数据归档搬运对应的表：" + acList.size() + " 张");

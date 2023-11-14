@@ -8,14 +8,14 @@ package com.small.archive.core.emuns;
  */
 public enum ArchiveTaskStatus {
 
-    PREPARE("10","归档任务准备完成"),
-    HANDING("20","归档任务数据搬运进行中"),
-    MIGRATED("29","归档任务数据搬运完成"),
-    VERIFYING("30","归档任务数据校对中"),
-    VERIFIED("39","归档任务数据校对完成"),
-    DELETE("40","归档任务源表数据删除中"),
-    COMPLETED("99", "归档任务全部完成"),
-    ERROR("00","归档任务出错");
+    PREPARE("PREPARE","归档任务准备完成"),
+    HANDING("HANDING","归档任务数据搬运进行中"),
+    MIGRATED("MIGRATED","归档任务数据搬运完成"),
+    VERIFYING("VERIFYING","归档任务数据校对中"),
+    VERIFIED("VERIFIED","归档任务数据校对完成"),
+    DELETE("DELETE","归档任务源表数据删除中"),
+    SUCCESS("SUCCESS", "归档任务全部完成"),
+    ERROR("ERROR","归档任务出错");
 
     private String status ;
     private String desc ;

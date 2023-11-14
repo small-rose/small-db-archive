@@ -1,9 +1,9 @@
-package com.small.archive.service.task;
+package com.small.archive.schedule;
 
 import com.small.archive.core.convertask.ArchiveConfToTaskService;
-import com.small.archive.core.emuns.ArchiveConfStatus;
+import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.dao.ArchiveDao;
-import com.small.archive.pojo.ArchiveConf;
+import com.small.archive.pojo.ArchiveJobConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,13 +36,13 @@ public class ArchiveConfConvertTask {
 
     @Transactional
     public void archiveConfConvert2Task() {
-        ArchiveConf query = new ArchiveConf();
-        query.setConfStatus(ArchiveConfStatus.CHECKED_SUCCESS.getStatus());
-        List<ArchiveConf> archiveConfs = archiveDao.queryArchiveConfList(query);
-        if (CollectionUtils.isEmpty(archiveConfs)) {
+        ArchiveJobConfig query = new ArchiveJobConfig();
+        query.setJobStatus(ArchiveJobStatus.CHECKED_SUCCESS.getStatus());
+        List<ArchiveJobConfig> archiveJobConfigs = archiveDao.queryArchiveConfList(query);
+        if (CollectionUtils.isEmpty(archiveJobConfigs)) {
             log.info("未检测校验成功[CHECKED_SUCCESS]可拆解执行的归档配置！");
         } else {
-            for (ArchiveConf conf : archiveConfs) {
+            for (ArchiveJobConfig conf : archiveJobConfigs) {
                 archiveConfToTaskService.conf2Task(conf);
             }
         }

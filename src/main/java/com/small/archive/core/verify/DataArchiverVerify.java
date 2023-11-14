@@ -1,7 +1,7 @@
 package com.small.archive.core.verify;
 
-import com.small.archive.pojo.ArchiveConf;
-import com.small.archive.pojo.ArchiveConfDetailTask;
+import com.small.archive.pojo.ArchiveJobConfig;
+import com.small.archive.pojo.ArchiveJobDetailTask;
 
 /**
  * @Project: small-db-archive
@@ -19,12 +19,12 @@ public interface DataArchiverVerify {
      * @param conf
      * @param acTask
      */
-    public  void executeVerify(ArchiveConf conf,  ArchiveConfDetailTask acTask);
+    public  void executeVerify(ArchiveJobConfig conf, ArchiveJobDetailTask acTask);
 
 
     /**
      * 执行校对检查
      * @param conf
       */
-    public boolean executeCheckVerify(ArchiveConf conf);
+    public boolean executeCheckVerify(ArchiveJobConfig conf);
 }

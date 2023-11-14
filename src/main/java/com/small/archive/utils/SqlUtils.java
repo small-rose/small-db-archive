@@ -1,7 +1,7 @@
 package com.small.archive.utils;
 
 import com.small.archive.core.emuns.ArchiveParamType;
-import com.small.archive.pojo.ArchiveConfParam;
+import com.small.archive.pojo.ArchiveJobConfParam;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -66,12 +66,12 @@ public class SqlUtils {
     }
 
 
-    public static String buildTaskSql(String sql, List<ArchiveConfParam> paramList) {
+    public static String buildTaskSql(String sql, List<ArchiveJobConfParam> paramList) {
         if (CollectionUtils.isEmpty(paramList)){
             return sql;
         }
         String tmp = sql ;
-        for (ArchiveConfParam param : paramList){
+        for (ArchiveJobConfParam param : paramList){
             if (ArchiveParamType.DATE.name().equalsIgnoreCase(param.getParamType())){
                 param.setParamValue(" date'".concat(param.getParamValue()).concat("' "));
             }

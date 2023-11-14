@@ -20,12 +20,17 @@ public class DigestUtils {
 
 
 
-    public static Map<String, String> messageDigestConvert(List<Map<String, Object>> sourceList, String primaryKey) throws NoSuchAlgorithmException {
+    public static Map<String, String> messageDigestConvert(List<Map<String, Object>> sourceList, List<String> primaryKeyList) throws NoSuchAlgorithmException {
         HashMap result = new HashMap(sourceList.size());
+        StringBuffer pk = new StringBuffer();
         for (Map<String, Object> line : sourceList) {
             String digest = calculateDigest(line.values().toString());
-            String primary = line.keySet().stream().filter(s -> s.equalsIgnoreCase(primaryKey)).findFirst().get();
-            result.put(digest, line.get(primary));
+            for (String s : line.keySet()) {
+                if(primaryKeyList.contains(s.toUpperCase())){
+                    pk.append(line.get(s));
+                }
+            }
+            result.put(digest, pk.toString());
         }
         return result;
     }

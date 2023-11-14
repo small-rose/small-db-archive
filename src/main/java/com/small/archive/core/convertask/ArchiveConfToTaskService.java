@@ -1,7 +1,7 @@
 package com.small.archive.core.convertask;
 
-import com.small.archive.core.emuns.ArchiveModeStrategy;
-import com.small.archive.pojo.ArchiveConf;
+import com.small.archive.core.emuns.ArchiveStrategyEnum;
+import com.small.archive.pojo.ArchiveJobConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +22,9 @@ public class ArchiveConfToTaskService {
     private ArchiveConvertFactory archiveConvertFactory ;
 
 
-    public boolean conf2Task(ArchiveConf conf){
-        ArchiveConfConvert archiveConfConvert = archiveConvertFactory.getConvertTaskModeService(ArchiveModeStrategy.getMode(conf.getConfMode()));
-        return archiveConfConvert.confConvertTask(conf);
+    public boolean conf2Task(ArchiveJobConfig conf){
+        ArchiveJobConvertTask archiveJobConvertTask = archiveConvertFactory.getConvertTaskModeService(ArchiveStrategyEnum.getStrategy(conf.getJobMode()));
+        return archiveJobConvertTask.jobConvertTask(conf);
     }
 
 

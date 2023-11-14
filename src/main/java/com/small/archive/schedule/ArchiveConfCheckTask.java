@@ -1,9 +1,9 @@
-package com.small.archive.service.task;
+package com.small.archive.schedule;
 
 import com.small.archive.core.check.inteceptors.CheckInterceptorManager;
-import com.small.archive.core.emuns.ArchiveConfStatus;
+import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.dao.ArchiveDao;
-import com.small.archive.pojo.ArchiveConf;
+import com.small.archive.pojo.ArchiveJobConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,26 +37,26 @@ public class ArchiveConfCheckTask {
 
     @Transactional
     public void archiveConfWatch() {
-        ArchiveConf query = new ArchiveConf();
-        query.setConfStatus(ArchiveConfStatus.PREPARE.getStatus());
-        List<ArchiveConf> archiveConfs = archiveDao.queryArchiveConfList(query);
-        if (CollectionUtils.isEmpty(archiveConfs)) {
+        ArchiveJobConfig query = new ArchiveJobConfig();
+        query.setJobStatus(ArchiveJobStatus.PREPARE.getStatus());
+        List<ArchiveJobConfig> archiveJobConfigs = archiveDao.queryArchiveConfList(query);
+        if (CollectionUtils.isEmpty(archiveJobConfigs)) {
             log.info("未检测到预备[PREPARE]的归档配置！");
         } else {
-            for (ArchiveConf conf : archiveConfs) {
+            for (ArchiveJobConfig conf : archiveJobConfigs) {
                 checkInterceptorManager.applyCheck(conf);
             }
         }
 
         // 补偿上次操作CHECKING 失败的
-        query.setConfStatus(ArchiveConfStatus.CHECKED_FAILED.getStatus());
-        List<ArchiveConf> archiveCheckFailed = archiveDao.queryArchiveConfList(query);
+        query.setJobStatus(ArchiveJobStatus.CHECKED_FAILED.getStatus());
+        List<ArchiveJobConfig> archiveCheckFailed = archiveDao.queryArchiveConfList(query);
         if (CollectionUtils.isEmpty(archiveCheckFailed)) {
             log.info("检查上次 CHECKED_FAILED的数据, 未检测到 CHECKED_FAILED 的归档配置！");
             return;
         }
         log.info("检查上次 CHECKED_FAILED的数据, 检测到 CHECKED_FAILED 的归档配置: " + archiveCheckFailed.size() + " 个");
-        for (ArchiveConf confFailed : archiveCheckFailed) {
+        for (ArchiveJobConfig confFailed : archiveCheckFailed) {
             checkInterceptorManager.applyCheck(confFailed);
         }
     }

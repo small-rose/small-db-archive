@@ -1,7 +1,7 @@
 package com.small.archive.dao;
 
 import com.small.archive.core.emuns.ArchiveTaskStatus;
-import com.small.archive.pojo.ArchiveConfDetailTask;
+import com.small.archive.pojo.ArchiveJobDetailTask;
 import com.small.archive.service.jdbc.JdbcTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,21 +41,21 @@ public class ArchiveTaskDao {
     }
 
 
-    public int updateTaskStatus(ArchiveConfDetailTask acTask, ArchiveTaskStatus taskStatus) {
-        String sql = "update archive_conf_detail_task a set  a.task_status=? " +
+    public int updateTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+        String sql = "update ARCHIVE_JOB_DETAIL_TASK a set  a.task_status=? " +
                 ", task_start = ?  where id = ? ";
         return jdbcTemplate.update(sql, taskStatus.getStatus(), acTask.getTaskStart(), acTask.getId());
     }
 
-    public int updateArchiveConfDetailTaskStatus(ArchiveConfDetailTask acTask, ArchiveTaskStatus taskStatus) {
-        String sql = "update archive_conf_detail_task a set a.task_status=? , a.actual_size = ? ," +
+    public int updateArchiveConfDetailTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+        String sql = "update ARCHIVE_JOB_DETAIL_TASK a set a.task_status=? , a.actual_size = ? ," +
                 " task_end = ?  where id = ? ";
         return jdbcTemplate.update(sql, taskStatus.getStatus(),acTask.getActualSize(), acTask.getTaskEnd(), acTask.getId());
     }
 
 
-    public int updateVerifyTaskStatus(ArchiveConfDetailTask acTask, ArchiveTaskStatus taskStatus) {
-        String sql = "update archive_conf_detail_task a set a.verify_size=? , a.task_status='02' " +
+    public int updateVerifyTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+        String sql = "update ARCHIVE_JOB_DETAIL_TASK a set a.verify_size=? , a.task_status='02' " +
                 ", verify_start = ? , verify_end = ? where id = ? ";
         return jdbcTemplate.update(sql, acTask.getVerifySize(), taskStatus.getStatus(), acTask.getVerifyStart(),acTask.getVerifyEnd(), acTask.getId());
     }
@@ -66,15 +66,15 @@ public class ArchiveTaskDao {
         return jdbcTemplate.queryForObject(sql, Date.class);
     }
 
-    public long updateForBatch(List<ArchiveConfDetailTask> taskList) {
-        String sql = "insert into archive_conf_detail_task (id, conf_id, current_batch_no, task_order, task_source_tab," +
-                "task_target_tab, task_sql, expect_size, task_status, create_time) " +
-                " values (sql.nextval,?,?,?,?)";
+    public long updateForBatch(List<ArchiveJobDetailTask> taskList) {
+        String sql = "insert into ARCHIVE_JOB_DETAIL_TASK (id, job_id, job_batch_no, task_order, source_table," +
+                "target_table, task_sql, expect_size, task_status, create_time) " +
+                " values (sql.nextval, ?,?,?,?,  ?,?,?,?, ?)";
         List<Object[]> paramsList = new ArrayList<>(taskList.size());
-        for (ArchiveConfDetailTask t : taskList) {
+        for (ArchiveJobDetailTask t : taskList) {
             Object[] params = new Object[]{
-                    t.getConfId(), t.getCurrentBatchNo(), t.getTaskOrder(), t.getTaskSourceTab(),
-                    t.getTaskTargetTab(), t.getTaskSql(), t.getExpectSize(), t.getTaskStart(), t.getCreateTime()
+                    t.getJobId(), t.getJobBatchNo(), t.getTaskOrder(), t.getSourceTable(),
+                    t.getTargetTable(), t.getTaskSql(), t.getExpectSize(), t.getTaskStart(), t.getCreateTime()
             };
             paramsList.add(params);
         }

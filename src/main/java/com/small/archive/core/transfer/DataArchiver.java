@@ -1,6 +1,6 @@
 package com.small.archive.core.transfer;
 
-import com.small.archive.pojo.ArchiveConfDetailTask;
+import com.small.archive.pojo.ArchiveJobDetailTask;
 
 /**
  * @Project : small-db-archive
@@ -13,7 +13,7 @@ import com.small.archive.pojo.ArchiveConfDetailTask;
 public  interface DataArchiver {
 
 
-    public  void executeArchive(ArchiveConfDetailTask acTask);
+    public  void executeArchive(ArchiveJobDetailTask acTask);
 
 
 

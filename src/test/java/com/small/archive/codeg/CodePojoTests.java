@@ -28,14 +28,14 @@ public class CodePojoTests extends SmallDbArchiveAppTests {
     public void test01(){
         String sql = "SELECT  TC.TABLE_NAME,  TC.COLUMN_NAME, DATA_TYPE\n" +
                 "FROM USER_TAB_COLUMNS TC\n" +
-                "WHERE  TC.TABLE_NAME in ('ARCHIVE_CONF','ARCHIVE_CONF_PARAM','ARCHIVE_CONF_DETAIL_TASK'，'ARCHIVE_CONF_TASK_LOG')\n" +
+                "WHERE  TC.TABLE_NAME in ('ARCHIVE_JOB_CONFIG','ARCHIVE_JOB_CONF_PARAM','ARCHIVE_JOB_DETAIL_TASK','ARCHIVE_TASK_LOG')\n" +
                 "ORDER BY TC.TABLE_NAME  , TC.COLUMN_ID ASC ";
         List<TbColumn> tbColumns = jdbcTemplateService.queryForList(sql, TbColumn.class);
         Map<String, List<TbColumn>> collect = tbColumns.stream().collect(Collectors.groupingBy(TbColumn::getTableName));
         String line = "private %s %s ;" ;
         for (String tableName : collect.keySet()) {
             List<TbColumn> columnList = collect.get(tableName);
-            System.out.println("--------------------------------"+tableName);
+            System.out.println("--------------------------------"+CamelCaseUtils.toCamelCase(tableName));
             columnList.forEach(t->{
                 String l = String.format(line, getType(t.getDataType()), CamelCaseUtils.toCamelCase(t.getColumnName()));
                 System.out.println(l);

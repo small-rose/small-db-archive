@@ -1,6 +1,6 @@
 package com.small.archive.core.transfer;
 
-import com.small.archive.pojo.ArchiveConf;
+import com.small.archive.pojo.ArchiveJobConfig;
 
 /**
  * @Project : small-db-archive
@@ -12,7 +12,7 @@ import com.small.archive.pojo.ArchiveConf;
  */
 public  interface ConfArchiver {
 
-    public  void executeConfArchive(ArchiveConf conf);
+    public  void executeConfArchive(ArchiveJobConfig conf);
 
 
 }

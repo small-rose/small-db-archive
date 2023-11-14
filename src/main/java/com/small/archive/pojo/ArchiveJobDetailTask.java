@@ -7,34 +7,36 @@ import java.util.Date;
 /**
  * @Project : small-db-archive
  * @Author : zhangzongyuan
- * @Description : [ ArchiveConf ] 说明：无
+ * @Description : [ ArchiveJobConfig ] 说明：无
  * @Function :  功能说明：无
  * @Date ：2023/11/11 15:22
  * @Version ： 1.0
  **/
 @Data
-public class ArchiveConfDetailTask {
+public class ArchiveJobDetailTask {
 
-    private Long id ;
-    private Long confId ;
-    private String currentBatchNo ;
-    private Long taskOrder ;
-    private String taskSourceTab ;
-    private String taskTargetTab ;
+    private long id ;
+    private long jobId ;
+    private String jobBatchNo ;
+    private String sourceTable ;
+    private String targetTable ;
     private String taskSql ;
-    private Long expectSize ;
-    private Long actualSize ;
     private String taskStatus ;
-    private Date createTime ;
+    private int taskOrder ;
+    private long expectSize ;
+    private long actualSize ;
     private Date taskStart ;
     private Date taskEnd ;
-    private Long verifySize ;
+    private long verifySize ;
     private Date verifyStart ;
     private Date verifyEnd ;
-    private Long deleteSize ;
+    private long deleteSize ;
     private Date deleteStart ;
     private Date deleteEnd ;
-    private String errorInfo ;
+    private String deleteSql ;
+
+    private Date createTime ;
+    private Date lastUpdateTime ;
     private String ext1 ;
     private String ext2 ;
 

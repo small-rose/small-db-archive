@@ -1,15 +1,17 @@
-package com.small.archive.core.delete;
+package com.small.archive.core.delete.strategy;
 
-import com.small.archive.core.emuns.ArchiveConfStatus;
-import com.small.archive.core.emuns.ArchiveLogPhase;
-import com.small.archive.core.emuns.ArchiveLogStatus;
-import com.small.archive.core.transfer.ArchiveTaskService;
+import com.small.archive.core.emuns.ArchiveJobPhase;
+import com.small.archive.core.emuns.ArchiveJobStatus;
+import com.small.archive.core.emuns.ArchiveLogResult;
+import com.small.archive.core.emuns.ArchiveStrategyEnum;
+import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.transfer.ArchiveJobTaskService;
 import com.small.archive.exception.DataArchiverException;
-import com.small.archive.pojo.ArchiveConf;
-import com.small.archive.pojo.ArchiveConfDetailTask;
-import com.small.archive.pojo.ArchiveConfTaskLog;
-import com.small.archive.service.ArchiveConfService;
-import com.small.archive.service.ArchiveLogService;
+import com.small.archive.pojo.ArchiveJobConfig;
+import com.small.archive.pojo.ArchiveJobDetailTask;
+import com.small.archive.pojo.ArchiveTaskLog;
+import com.small.archive.service.ArchiveJobConfService;
+import com.small.archive.service.ArchiveTaskLogService;
 import com.small.archive.utils.DigestUtils;
 import com.small.archive.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Project: small-db-archive
@@ -34,46 +37,54 @@ import java.util.Set;
 
 @Slf4j
 @Service
-public class ArchiveTaskDeleteService implements ArchiveTaskDelete {
+public class ArchiveTaskDeletePkDateDayStrategy implements ArchiveTaskDeleteStrategy {
 
 
     @Autowired
-    private ArchiveTaskService archiveTaskService;
+    private ArchiveJobTaskService archiveJobTaskService;
     @Autowired
-    private ArchiveConfService archiveConfService;
+    private ArchiveJobConfService archiveJobConfService;
     @Autowired
-    private ArchiveLogService archiveLogService;
+    private ArchiveTaskLogService archiveTaskLogService;
 
+    /**
+     * 支持按照 日期删除
+     * @return
+     */
+    @Override
+    public ArchiveStrategyEnum getArchiveStrategy() {
+        return ArchiveStrategyEnum.ARCHIVE_DATE_DAY;
+    }
 
     @Override
     @Transactional( rollbackFor = DataArchiverException.class )
-    public void deleteSourceData(ArchiveConf conf, ArchiveConfDetailTask acTask) {
-        ArchiveConfTaskLog taskLog = new ArchiveConfTaskLog(acTask);
+    public boolean deleteArchivedSourceData(ArchiveJobConfig conf, ArchiveJobDetailTask acTask) {
+        ArchiveTaskLog taskLog = new ArchiveTaskLog(acTask);
 
         try {
-            taskLog.setConfId(acTask.getConfId());
+            taskLog.setJobId(acTask.getJobId());
             taskLog.setTaskId(acTask.getId());
-            taskLog.setTaskPhase(ArchiveLogPhase.DELETE.getStatus());
+            taskLog.setTaskPhase(ArchiveJobPhase.DELETE.getStatus());
             taskLog.setCreateTime(new Date());
 
 
-            archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.DELETE);
+            archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.DELETE);
             // 查询满足删除条件的数据
             String whereSql = acTask.getTaskSql();
-            String sql = SqlUtils.buildAppendSelectSql(acTask.getTaskSourceTab(), whereSql);
-            List<Map<String, Object>> sourceList = archiveTaskService.querySourceList(sql);
+            String sql = SqlUtils.buildAppendSelectSql(acTask.getSourceTable(), whereSql);
+            List<Map<String, Object>> sourceList = archiveJobTaskService.querySourceList(sql);
 
-            if (conf.getConfDelCheck() > 0) {
+            if (conf.getJobDelCheck() > 0) {
 
-                List<Map<String, Object>> targetList = archiveTaskService.queryTargetList(sql);
+                List<Map<String, Object>> targetList = archiveJobTaskService.queryTargetList(sql);
                 if (sourceList.size() != targetList.size()) {
                     throw new DataArchiverException("归档删除任务，删除前再次确认归档数据，发现源表和归档表数据量不一致!");
                 }
 
                 Set<String> columnsSet = sourceList.get(0).keySet();
-                String primaryKey = columnsSet.stream().filter(s -> s.equalsIgnoreCase(conf.getConfPk())).findFirst().get();
-                Map<String, String> sources = DigestUtils.messageDigestConvert(sourceList, primaryKey);
-                Map<String, String> targets = DigestUtils.messageDigestConvert(sourceList, primaryKey);
+                List<String> pkList = columnsSet.stream().filter(s -> conf.getJobColumns().contains(s)).map(String::toUpperCase).collect(Collectors.toList());
+                Map<String, String> sources = DigestUtils.messageDigestConvert(sourceList, pkList);
+                Map<String, String> targets = DigestUtils.messageDigestConvert(sourceList, pkList);
                 boolean total1 = sources.keySet().containsAll(targets.keySet());
                 boolean total2 = targets.keySet().containsAll(sources.keySet());
                 if (!total1 || !total2) {
@@ -82,27 +93,28 @@ public class ArchiveTaskDeleteService implements ArchiveTaskDelete {
                 }
             }
 
-            String delSql = SqlUtils.buildAppendDeleteSql(acTask.getTaskSourceTab(), whereSql);
+            String delSql = SqlUtils.buildAppendDeleteSql(acTask.getSourceTable(), whereSql);
             log.info("归档删除任务，清理源库表数据SQL: {}" + delSql);
-            int total = archiveTaskService.deleteSouceTab(delSql);
+            int total = archiveJobTaskService.deleteSouceTab(delSql);
             if (total != acTask.getVerifySize()) {
                 throw new DataArchiverException("归档删除任务，删除源库数据后校对出现差异，回滚删除!");
             }
             // 更新配置状态要已完成
-            archiveConfService.updateArchiveConfStatus(conf, ArchiveConfStatus.SUCCESS);
+            archiveJobTaskService.updateJobTaskStatus(acTask, ArchiveTaskStatus.SUCCESS);
         } catch (Exception e) {
             String ex = ExceptionUtils.getStackTrace(e);
-            taskLog.setExecResult(ArchiveLogStatus.ERROR.getStatus());
+            taskLog.setTaskResult(ArchiveLogResult.ERROR.getStatus());
             if (ex.length() > 2000) {
                 ex = ex.substring(0, 2000);
             }
             taskLog.setErrorInfo(ex);
-
+            // 更新配置状态要已完成
+            archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.DELETE_FAILED);
             log.info("归档删除任务，执行失败：taskId= " + acTask.getId() + "：exception :" + ex);
             throw new DataArchiverException("归档删除任务，执行失败!", e);
         } finally {
             try {
-                archiveLogService.saveArchiveLog(taskLog);
+                archiveTaskLogService.saveArchiveLog(taskLog);
                 log.info("执行归档任务日志保存成功！");
             } catch (Exception e) {
                 String message = ExceptionUtils.getMessage(e);
@@ -110,5 +122,6 @@ public class ArchiveTaskDeleteService implements ArchiveTaskDelete {
             }
 
         }
+        return true;
     }
 }

@@ -2,9 +2,8 @@ package com.small.archive.dao;
 
 import com.small.archive.core.constant.ArchiveConstant;
 import com.small.archive.core.context.ArchiveContextHolder;
-import com.small.archive.core.emuns.ArchiveModeStrategy;
 import com.small.archive.exception.ArchiverCheckException;
-import com.small.archive.pojo.ArchiveConf;
+import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.utils.SmallUtils;
 import com.small.archive.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +31,7 @@ public class ArchiveCheckDao {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private JdbcTemplate archiveJdbcTemplate;
-    @Autowired
-    private ArchiveDao archiveDao;
+
 
     public boolean checkExistsSourceTable(String tableName) {
         try {
@@ -63,10 +61,10 @@ public class ArchiveCheckDao {
         return false;
     }
 
-    public boolean checkSourceTableSql(ArchiveConf conf) {
+    public boolean checkSourceTableSql(ArchiveJobConfig conf) {
         Map<String, Object> archiveMap = new HashMap<>();
         try {
-            String archSql = SqlUtils.buildCheckSelectSql(conf.getConfSourceTab(), conf.getConfWhere());
+            String archSql = SqlUtils.buildCheckSelectSql(conf.getSourceTable(), conf.getJobCondition());
             log.info(">>> source table count sql >>> " + archSql);
             Long count = jdbcTemplate.queryForObject(archSql, Long.class);
             archiveMap.put(ArchiveConstant.COUNT_SOURCE, count);
@@ -86,10 +84,10 @@ public class ArchiveCheckDao {
         }
     }
 
-    public boolean checkTargetTableSql(ArchiveConf conf) {
+    public boolean checkTargetTableSql(ArchiveJobConfig conf) {
         Map<String, Object> archiveMap = new HashMap<>();
         try {
-            String archSql = SqlUtils.buildCheckSelectSql(conf.getConfTargetTab(), conf.getConfWhere());
+            String archSql = SqlUtils.buildCheckSelectSql(conf.getTargetTable(), conf.getJobCondition());
             log.info(">>> target table count sql >>> " + archSql);
             Long count = archiveJdbcTemplate.queryForObject(archSql, Long.class);
             archiveMap.put(ArchiveConstant.COUNT_TARGET, count);
@@ -116,8 +114,5 @@ public class ArchiveCheckDao {
         return count1;
     }
 
-    public boolean checkConfMode(String confMode) {
-        ArchiveModeStrategy mode = ArchiveModeStrategy.getMode(confMode);
-        return !ArchiveModeStrategy.NULL_MODE.name().equalsIgnoreCase(mode.name());
-    }
+
 }
