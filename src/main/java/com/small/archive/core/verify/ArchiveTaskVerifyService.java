@@ -1,14 +1,14 @@
 package com.small.archive.core.verify;
 
 import com.small.archive.core.emuns.ArchiveJobPhase;
-import com.small.archive.core.emuns.ArchiveLogResult;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
-import com.small.archive.core.transfer.ArchiveJobTaskService;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
+import com.small.archive.core.emuns.LogResultEnum;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.exception.DataArchiverException;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
 import com.small.archive.pojo.ArchiveTaskLog;
+import com.small.archive.service.ArchiveJobTaskService;
 import com.small.archive.service.ArchiveTaskLogService;
 import com.small.archive.utils.DigestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -59,9 +59,9 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
 
             acTask.setVerifyStart(new Date());
             acTask.setVerifySize(0);
-            archiveJobTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatus.VERIFYING);
+            archiveJobTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatusEnum.VERIFYING);
 
-            String sql = acTask.getTaskSql();
+            String sql = acTask.getTaskSelSql();
             if (acTask.getExpectSize() != acTask.getActualSize()) {
                 throw new DataArchiverException("归档任务校验taskId= " + acTask.getId() + "搬运数据记录预期数量和实际数量不符，校验失败");
             }
@@ -91,11 +91,11 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
 
             acTask.setVerifyEnd(new Date());
             acTask.setVerifySize(Long.valueOf(sources.size()));
-            archiveJobTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatus.VERIFIED);
+            archiveJobTaskService.updateVerifyTaskStatus(acTask, ArchiveTaskStatusEnum.VERIFIED);
         } catch (Exception e) {
             String ex = ExceptionUtils.getStackTrace(e);
 
-            taskLog.setTaskResult(ArchiveLogResult.ERROR.getStatus());
+            taskLog.setTaskResult(LogResultEnum.ERROR.getStatus());
             if (ex.length() > 2000) {
                 ex = ex.substring(0, 2000);
             }
@@ -120,7 +120,7 @@ public class ArchiveTaskVerifyService implements DataArchiverVerify {
     public boolean executeCheckVerify(ArchiveJobConfig conf) {
         try {
 
-            List<ArchiveJobDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.VERIFIED);
+            List<ArchiveJobDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatusEnum.VERIFIED);
 
             if (CollectionUtils.isEmpty(taskList)) {
                 throw new DataArchiverException("归档任务总数据校对失败！还有未执行完成的任务");

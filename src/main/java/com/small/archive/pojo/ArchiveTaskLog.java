@@ -1,5 +1,6 @@
 package com.small.archive.pojo;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
@@ -11,6 +12,7 @@ import java.util.Date;
  * @date: 2023/11/12 012 2:05
  * @version: v1.0
  */
+@Builder
 @Data
 public class ArchiveTaskLog {
 

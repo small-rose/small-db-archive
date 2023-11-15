@@ -3,7 +3,7 @@ package com.small.archive.core.delete;
 import com.small.archive.core.delete.strategy.ArchiveTaskDelStrategyFactory;
 import com.small.archive.core.delete.strategy.ArchiveTaskDeleteStrategy;
 import com.small.archive.core.emuns.ArchiveStrategyEnum;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
@@ -46,7 +46,7 @@ public class ArchivedJobTaskDeleteService implements ArchivedJobTaskDelete {
     public boolean executeCheckDelete(ArchiveJobConfig conf) {
 
         //检查当前批次任务是否出错
-        List<ArchiveJobDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.ERROR);
+        List<ArchiveJobDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatusEnum.ERROR);
         if (!CollectionUtils.isEmpty(taskList)) {
             log.info("当前批次任务存在出错任务！请人工检查！");
             return false;

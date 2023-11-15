@@ -1,6 +1,6 @@
 package com.small.archive.dao;
 
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.pojo.ArchiveJobConfParam;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
@@ -46,7 +46,7 @@ public class ArchiveLogDao {
         return jdbcTemplateService.queryForList(sql, ArchiveJobConfParam.class);
     }
 
-    public List<ArchiveJobDetailTask> queryArchiveConfDetailTaskList(ArchiveJobConfig conf, ArchiveTaskStatus taskStatus){
+    public List<ArchiveJobDetailTask> queryArchiveConfDetailTaskList(ArchiveJobConfig conf, ArchiveTaskStatusEnum taskStatus){
         String sql = " select t.* from  ARCHIVE_JOB_CONFIG_DETAIL_TASK t  where t.conf_id "+conf.getId()+
                 " and a.task_batch_no = '"+conf.getJobBatchNo()+"' a.task_status = '"+taskStatus.getStatus()+"' order by a.task_order ";
         return jdbcTemplateService.queryForList(sql, ArchiveJobDetailTask.class);

@@ -1,6 +1,6 @@
-package com.small.archive.core.transfer;
+package com.small.archive.service;
 
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.dao.ArchiveTaskDao;
 import com.small.archive.pojo.ArchiveJobDetailTask;
 import lombok.extern.slf4j.Slf4j;
@@ -50,19 +50,19 @@ public class ArchiveJobTaskService {
     }
 
     @Transactional
-    public int updateJobTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    public int updateJobTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatusEnum taskStatus) {
         return archiveTaskDao.updateArchiveConfDetailTaskStatus(acTask, taskStatus);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public int updateJobTaskStatusError(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    public int updateJobTaskStatusError(ArchiveJobDetailTask acTask, ArchiveTaskStatusEnum taskStatus) {
         return archiveTaskDao.updateArchiveConfDetailTaskStatus(acTask, taskStatus);
     }
 
  
 
 
-    public int updateVerifyTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    public int updateVerifyTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatusEnum taskStatus) {
         return archiveTaskDao.updateVerifyTaskStatus(acTask, taskStatus);
     }
 

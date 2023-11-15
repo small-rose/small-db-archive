@@ -2,15 +2,15 @@ package com.small.archive.core.delete.strategy;
 
 import com.small.archive.core.emuns.ArchiveJobPhase;
 import com.small.archive.core.emuns.ArchiveJobStatus;
-import com.small.archive.core.emuns.ArchiveLogResult;
 import com.small.archive.core.emuns.ArchiveStrategyEnum;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
-import com.small.archive.core.transfer.ArchiveJobTaskService;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
+import com.small.archive.core.emuns.LogResultEnum;
 import com.small.archive.exception.DataArchiverException;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
 import com.small.archive.pojo.ArchiveTaskLog;
 import com.small.archive.service.ArchiveJobConfService;
+import com.small.archive.service.ArchiveJobTaskService;
 import com.small.archive.service.ArchiveTaskLogService;
 import com.small.archive.utils.DigestUtils;
 import com.small.archive.utils.SqlUtils;
@@ -70,7 +70,7 @@ public class ArchiveTaskDeletePkDateDayStrategy implements ArchiveTaskDeleteStra
 
             archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.DELETE);
             // 查询满足删除条件的数据
-            String whereSql = acTask.getTaskSql();
+            String whereSql = acTask.getTaskSelSql();
             String sql = SqlUtils.buildAppendSelectSql(acTask.getSourceTable(), whereSql);
             List<Map<String, Object>> sourceList = archiveJobTaskService.querySourceList(sql);
 
@@ -100,10 +100,10 @@ public class ArchiveTaskDeletePkDateDayStrategy implements ArchiveTaskDeleteStra
                 throw new DataArchiverException("归档删除任务，删除源库数据后校对出现差异，回滚删除!");
             }
             // 更新配置状态要已完成
-            archiveJobTaskService.updateJobTaskStatus(acTask, ArchiveTaskStatus.SUCCESS);
+            archiveJobTaskService.updateJobTaskStatus(acTask, ArchiveTaskStatusEnum.SUCCESS);
         } catch (Exception e) {
             String ex = ExceptionUtils.getStackTrace(e);
-            taskLog.setTaskResult(ArchiveLogResult.ERROR.getStatus());
+            taskLog.setTaskResult(LogResultEnum.ERROR.getStatus());
             if (ex.length() > 2000) {
                 ex = ex.substring(0, 2000);
             }

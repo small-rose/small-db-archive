@@ -1,17 +1,18 @@
-package com.small.archive.core.convertask;
+package com.small.archive.core.convertask.stategys;
 
 import com.small.archive.core.constant.ArchiveConstant;
 import com.small.archive.core.context.ArchiveContextHolder;
 import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.core.emuns.ArchiveStrategyEnum;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
-import com.small.archive.dao.ArchiveDao;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.dao.ArchiveTaskDao;
 import com.small.archive.exception.ArchiverConvertException;
 import com.small.archive.pojo.ArchiveJobConfParam;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
+import com.small.archive.service.ArchiveJobConfService;
 import com.small.archive.service.ArchiveSqlService;
+import com.small.archive.service.ArchiveTaskLogService;
 import com.small.archive.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -41,23 +42,28 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class ArchivePkStrConvertStrategy implements ArchiveJobConvertTask {
+public class ArchivedByPkStringConvertStrategy extends AbstractLogStrategy implements ArchiveJobConvertStrategy {
 
     @Autowired
-    private ArchiveDao archiveDao;
+    private ArchiveJobConfService archiveJobConfService;
     @Autowired
     private ArchiveTaskDao archiveTaskDao ;
     @Autowired
     private ArchiveSqlService archiveSqlService;
 
+    public ArchivedByPkStringConvertStrategy(ArchiveTaskLogService archiveTaskLogService) {
+        super(archiveTaskLogService);
+    }
+
     @Override
-    public ArchiveStrategyEnum getMode() {
+    public ArchiveStrategyEnum getStrategyMode() {
         return ArchiveStrategyEnum.ARCHIVE_PK_STRING;
     }
 
     @Override
     @Transactional(rollbackFor = ArchiverConvertException.class )
-    public boolean jobConvertTask(ArchiveJobConfig conf) {
+    public boolean jobConvertTask(ArchiveJobConfig jobConfig) {
+        create();
         try {
             // 再次校验是否有数据需要归档
             Map<String, Object> archiveMap = ArchiveContextHolder.getArchiveMap();
@@ -66,23 +72,23 @@ public class ArchivePkStrConvertStrategy implements ArchiveJobConvertTask {
                 log.info("本次无可归档数据，不生成归档任务！");
                 return false;
             }
-            double pageSize = conf.getJobPageSize();
+            double pageSize = jobConfig.getJobPageSize();
             int pageNo = 1;
             if (sourceCount> pageSize){
                 pageNo = (int) Math.ceil(sourceCount / pageSize)  + 1 ;
             }
             // 提取SQL参数
-            List<ArchiveJobConfParam> paramList = archiveDao.queryArchiveConfParamList();
+            List<ArchiveJobConfParam> paramList = archiveJobConfService.queryArchiveConfParamListByConfId(jobConfig.getId());
             List<ArchiveJobConfParam> confParamList = null;
             if (!CollectionUtils.isEmpty(paramList)){
-                confParamList = paramList.stream().collect(Collectors.groupingBy(ArchiveJobConfParam::getJobId)).get(conf.getId());
+                confParamList = paramList.stream().collect(Collectors.groupingBy(ArchiveJobConfParam::getJobId)).get(jobConfig.getId());
             }
 
-            String sql =  conf.getJobCondition();
+            String sql =  jobConfig.getJobCondition();
 
 
-            List<ArchiveJobConfParam> idList = confParamList.stream().filter(s -> conf.getJobColumns().toLowerCase().contains(s.getParamPk().toLowerCase())).collect(Collectors.toList());
-            List<ArchiveJobConfParam> noIdList = confParamList.stream().filter(s -> !conf.getJobColumns().toLowerCase().contains(s.getParamPk().toLowerCase())).collect(Collectors.toList());
+            List<ArchiveJobConfParam> idList = confParamList.stream().filter(s -> jobConfig.getJobColumns().toLowerCase().contains(s.getParamPk().toLowerCase())).collect(Collectors.toList());
+            List<ArchiveJobConfParam> noIdList = confParamList.stream().filter(s -> !jobConfig.getJobColumns().toLowerCase().contains(s.getParamPk().toLowerCase())).collect(Collectors.toList());
             Optional<ArchiveJobConfParam> startIdParam = idList.stream().min(Comparator.comparing(ArchiveJobConfParam::getParamValueInt));
             if (ObjectUtils.isEmpty(startIdParam)){
                 log.info("本次归档配置参数取最小ID有问题，无法生成归档任务！");
@@ -100,12 +106,14 @@ public class ArchivePkStrConvertStrategy implements ArchiveJobConvertTask {
                 return false;
             }
 
-            String batchNo = conf.getSourceTable().toUpperCase().concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
-            conf.setJobBatchNo(batchNo);
+            String batchNo = jobConfig.getSourceTable().toUpperCase().concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+            jobConfig.setJobBatchNo(batchNo);
 
             long idTmpStart = idStart;
             long idTmpEnd = 0;
-            long idSize = conf.getJobPageSize();
+            long idSize = jobConfig.getJobPageSize();
+            String selectSql = "";
+            String deleteSel = "";
             // 计算DATE
             List<ArchiveJobConfParam> actualParamList = archiveSqlService.calculateDateParams(noIdList) ;
             //计算ID,并准备保证任务
@@ -144,16 +152,19 @@ public class ArchivePkStrConvertStrategy implements ArchiveJobConvertTask {
                 }
 
                 sql = SqlUtils.buildTaskSql(sql, actualParamList);
+                selectSql = SqlUtils.buildAppendSelectSql(jobConfig.getSourceTable(), sql);
+                deleteSel = SqlUtils.buildAppendDeleteSql(jobConfig.getSourceTable(), sql);
                 ArchiveJobDetailTask task = new ArchiveJobDetailTask();
-                task.setJobId(conf.getId());
+                task.setJobId(jobConfig.getId());
                 task.setJobBatchNo(batchNo);
                 task.setCreateTime(new Date());
                 task.setTaskOrder(x);
-                task.setSourceTable(conf.getSourceTable());
-                task.setTargetTable(conf.getTargetTable());
-                task.setTaskSql(sql);
+                task.setSourceTable(jobConfig.getSourceTable());
+                task.setTargetTable(jobConfig.getTargetTable());
+                task.setTaskSelSql(selectSql);
+                task.setTaskDelSql(deleteSel);
                 archiveSqlService.checkTaskSql(sql, task);
-                task.setTaskStatus(ArchiveTaskStatus.PREPARE.getStatus());
+                task.setTaskStatus(ArchiveTaskStatusEnum.PREPARED.getStatus());
                 task.setCreateTime(new Date());
                 taskList.add(task);
             }
@@ -161,13 +172,20 @@ public class ArchivePkStrConvertStrategy implements ArchiveJobConvertTask {
             if (pageNo!=total){
                 throw new ArchiverConvertException("归档转换异常");
             }
-            conf.setJobBatchNo(batchNo);
-            conf.setJobStatus(ArchiveJobStatus.CONVERT_SUCCESS.getStatus());
-            archiveDao.updateArchiveConf(conf);
+            jobConfig.setJobBatchNo(batchNo);
+            jobConfig.setJobStatus(ArchiveJobStatus.CONVERT_SUCCESS.getStatus());
+            archiveJobConfService.updateArchiveConf(jobConfig);
         }catch (Exception e){
             String ex = ExceptionUtils.getStackTrace(e);
             log.info("归档配置拆分子任务异常："+ex);
+
+            jobConfig.setJobStatus(ArchiveJobStatus.CONVERT_FAILED.getStatus());
+            archiveJobConfService.updateArchiveConfStatusFailed(jobConfig, ArchiveJobStatus.CONVERT_FAILED);
+
+            setTaskLogProperties(jobConfig, ex);
             throw new ArchiverConvertException("归档转换异常");
+        }finally {
+            saveTaskLog();
         }
         return true;
     }

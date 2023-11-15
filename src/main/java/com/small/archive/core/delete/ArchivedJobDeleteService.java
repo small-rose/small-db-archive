@@ -1,7 +1,7 @@
 package com.small.archive.core.delete;
 
 import com.small.archive.core.emuns.ArchiveJobStatus;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.exception.DataArchiverException;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
@@ -37,7 +37,7 @@ public class ArchivedJobDeleteService implements ArchivedJobDelete {
     public void jobArchivedDataDelete(ArchiveJobConfig conf) {
         try {
             // 检测可删除的任务
-            List<ArchiveJobDetailTask> taskList = archiveJobConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.VERIFIED);
+            List<ArchiveJobDetailTask> taskList = archiveJobConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatusEnum.VERIFIED);
             if (CollectionUtils.isEmpty(taskList)){
                 log.info("未检测到已校验[VERIFIED]的归档任务！");
                 return;

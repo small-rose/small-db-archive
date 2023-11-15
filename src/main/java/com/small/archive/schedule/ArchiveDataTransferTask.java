@@ -1,7 +1,7 @@
 package com.small.archive.schedule;
 
 import com.small.archive.core.emuns.ArchiveJobStatus;
-import com.small.archive.core.transfer.ArchiveTransferConfService;
+import com.small.archive.core.transfer.JobConfArchiverService;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.pojo.ArchiveJobConfig;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @Project : small-db-archive
- * @description: TODO 功能角色说明： ArchiveTaskWatchService
+ * @description: TODO 功能角色说明： ArchiveDataTransferTask
  * TODO 描述：   数据搬运
  * @author: 张小菜
  * @date: 2023/11/12 012 0:22
@@ -23,14 +23,14 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ArchiveTransferTask {
+public class ArchiveDataTransferTask {
 
 
     @Autowired
     private ArchiveDao archiveDao;
 
     @Autowired
-    private ArchiveTransferConfService archiveTransferConfService;
+    private JobConfArchiverService jobConfArchiverService;
 
 
     public void archiveTaskExec() {
@@ -43,7 +43,7 @@ public class ArchiveTransferTask {
             return;
         }
         for (ArchiveJobConfig conf : acList) {
-            archiveTransferConfService.executeConfArchive(conf);
+            jobConfArchiverService.executeJobConfigArchive(conf);
         }
         log.info("本次扫扫描执行数据归档搬运对应的表：" + acList.size() + " 张");
     }

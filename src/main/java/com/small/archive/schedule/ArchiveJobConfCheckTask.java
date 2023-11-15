@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @Project : small-db-archive
- * @description: TODO 功能角色说明：
+ * @description: TODO 功能角色说明： ArchiveJobConfCheckTask
  * TODO 描述：
  * @author: 张小菜
  * @date: 2023/11/12 012 0:22
@@ -23,7 +23,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ArchiveConfCheckTask {
+public class ArchiveJobConfCheckTask {
 
 
     @Autowired

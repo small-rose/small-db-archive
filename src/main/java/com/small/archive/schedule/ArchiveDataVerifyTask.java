@@ -1,7 +1,7 @@
 package com.small.archive.schedule;
 
 import com.small.archive.core.emuns.ArchiveJobStatus;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.core.verify.ArchiveTaskVerifyService;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * @Project : small-db-archive
- * @description: TODO 功能角色说明： ArchiveTaskWatchService
+ * @description: TODO 功能角色说明： ArchiveDataVerifyTask
  * TODO 描述：   数据校对
  * @author: 张小菜
  * @date: 2023/11/12 012 0:22
@@ -25,7 +25,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ArchiveVerifyTask {
+public class ArchiveDataVerifyTask {
 
 
     @Autowired
@@ -46,7 +46,7 @@ public class ArchiveVerifyTask {
         }
         for (ArchiveJobConfig conf : archiveJobConfigs) {
             archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.VERIFYING);
-            List<ArchiveJobDetailTask> taskList = archiveJobConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.MIGRATED);
+            List<ArchiveJobDetailTask> taskList = archiveJobConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatusEnum.MIGRATED);
             if (CollectionUtils.isEmpty(taskList)) {
                 log.info(">>> 任务[ "+conf.getJobName() + " ] 未检测到可校验的归档任务！");
                 continue;

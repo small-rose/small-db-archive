@@ -20,7 +20,8 @@ public class ArchiveJobDetailTask {
     private String jobBatchNo ;
     private String sourceTable ;
     private String targetTable ;
-    private String taskSql ;
+    private String taskSelSql ;
+    private String taskDelSql ;
     private String taskStatus ;
     private int taskOrder ;
     private long expectSize ;
@@ -33,8 +34,6 @@ public class ArchiveJobDetailTask {
     private long deleteSize ;
     private Date deleteStart ;
     private Date deleteEnd ;
-    private String deleteSql ;
-
     private Date createTime ;
     private Date lastUpdateTime ;
     private String ext1 ;

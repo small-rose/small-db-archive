@@ -1,6 +1,6 @@
 package com.small.archive.dao;
 
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.pojo.ArchiveJobDetailTask;
 import com.small.archive.service.jdbc.JdbcTemplateService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,20 +41,20 @@ public class ArchiveTaskDao {
     }
 
 
-    public int updateTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    public int updateTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatusEnum taskStatus) {
         String sql = "update ARCHIVE_JOB_DETAIL_TASK a set  a.task_status=? " +
                 ", task_start = ?  where id = ? ";
         return jdbcTemplate.update(sql, taskStatus.getStatus(), acTask.getTaskStart(), acTask.getId());
     }
 
-    public int updateArchiveConfDetailTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    public int updateArchiveConfDetailTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatusEnum taskStatus) {
         String sql = "update ARCHIVE_JOB_DETAIL_TASK a set a.task_status=? , a.actual_size = ? ," +
                 " task_end = ?  where id = ? ";
         return jdbcTemplate.update(sql, taskStatus.getStatus(),acTask.getActualSize(), acTask.getTaskEnd(), acTask.getId());
     }
 
 
-    public int updateVerifyTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatus taskStatus) {
+    public int updateVerifyTaskStatus(ArchiveJobDetailTask acTask, ArchiveTaskStatusEnum taskStatus) {
         String sql = "update ARCHIVE_JOB_DETAIL_TASK a set a.verify_size=? , a.task_status='02' " +
                 ", verify_start = ? , verify_end = ? where id = ? ";
         return jdbcTemplate.update(sql, acTask.getVerifySize(), taskStatus.getStatus(), acTask.getVerifyStart(),acTask.getVerifyEnd(), acTask.getId());
@@ -68,13 +68,13 @@ public class ArchiveTaskDao {
 
     public long updateForBatch(List<ArchiveJobDetailTask> taskList) {
         String sql = "insert into ARCHIVE_JOB_DETAIL_TASK (id, job_id, job_batch_no, task_order, source_table," +
-                "target_table, task_sql, expect_size, task_status, create_time) " +
-                " values (sql.nextval, ?,?,?,?,  ?,?,?,?, ?)";
+                "target_table, task_sel_sql, task_del_sql, expect_size, task_status, create_time) " +
+                " values (sql.nextval, ?,?,?,?,?,  ?,?,?,?,?)";
         List<Object[]> paramsList = new ArrayList<>(taskList.size());
         for (ArchiveJobDetailTask t : taskList) {
             Object[] params = new Object[]{
-                    t.getJobId(), t.getJobBatchNo(), t.getTaskOrder(), t.getSourceTable(),
-                    t.getTargetTable(), t.getTaskSql(), t.getExpectSize(), t.getTaskStart(), t.getCreateTime()
+                    t.getJobId(), t.getJobBatchNo(), t.getTaskOrder(), t.getSourceTable(), t.getTargetTable(),
+                    t.getTaskSelSql(), t.getTaskDelSql(),  t.getExpectSize(), t.getTaskStart(), t.getCreateTime()
             };
             paramsList.add(params);
         }

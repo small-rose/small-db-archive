@@ -1,7 +1,7 @@
 package com.small.archive.core.transfer;
 
 import com.small.archive.core.emuns.ArchiveJobStatus;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.exception.DataArchiverException;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
@@ -24,20 +24,20 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class ArchiveTransferConfService implements ConfArchiver {
+public class JobConfArchiverService implements JobConfArchiver {
 
     @Autowired
     private ArchiveJobConfService archiveJobConfService;
     @Autowired
-    private ArchiveTransferService archiveTransferService;
+    private JobTaskDataArchiverService jobTaskDataArchiverService;
 
 
     @Override
     @Transactional( rollbackFor = DataArchiverException.class )
-    public void executeConfArchive(ArchiveJobConfig conf) {
+    public void executeJobConfigArchive(ArchiveJobConfig conf) {
         try {
             // 检测可搬运任务
-            List<ArchiveJobDetailTask> taskList = archiveJobConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.PREPARE);
+            List<ArchiveJobDetailTask> taskList = archiveJobConfService.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatusEnum.PREPARED);
             if (CollectionUtils.isEmpty(taskList)) {
                 log.info("未检测到可执行[PREPARE]的归档任务！");
                 return;
@@ -48,9 +48,9 @@ public class ArchiveTransferConfService implements ConfArchiver {
 
             for (ArchiveJobDetailTask task : taskList) {
                 //数据搬运，任务级事务
-                archiveTransferService.executeArchive(task);
+                jobTaskDataArchiverService.executeTaskDataArchive(task);
             }
-            boolean check = archiveTransferService.executeCheckArchive(conf);
+            boolean check = jobTaskDataArchiverService.executeCheckArchive(conf);
             if (check) {
                 // 标记搬运完成
                 archiveJobConfService.updateArchiveConfStatus(conf, ArchiveJobStatus.MIGRATED_SUCCESS);

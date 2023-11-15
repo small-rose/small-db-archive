@@ -1,6 +1,6 @@
 package com.small.archive.core.transfer;
 
-import com.small.archive.pojo.ArchiveJobConfig;
+import com.small.archive.pojo.ArchiveJobDetailTask;
 
 /**
  * @Project : small-db-archive
@@ -10,9 +10,11 @@ import com.small.archive.pojo.ArchiveJobConfig;
  * @date: 2023/11/12 012 0:22
  * @version: v1.0
  */
-public  interface ConfArchiver {
+public  interface JobTaskDataArchiver {
 
-    public  void executeConfArchive(ArchiveJobConfig conf);
+
+    public  void executeTaskDataArchive(ArchiveJobDetailTask acTask);
+
 
 
 }

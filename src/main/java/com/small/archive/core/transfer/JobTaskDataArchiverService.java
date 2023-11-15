@@ -1,13 +1,14 @@
 package com.small.archive.core.transfer;
 
 import com.small.archive.core.emuns.ArchiveJobPhase;
-import com.small.archive.core.emuns.ArchiveLogResult;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
+import com.small.archive.core.emuns.LogResultEnum;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.exception.DataArchiverException;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
 import com.small.archive.pojo.ArchiveTaskLog;
+import com.small.archive.service.ArchiveJobTaskService;
 import com.small.archive.service.ArchiveTaskLogService;
 import com.small.archive.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class ArchiveTransferService implements DataArchiver {
+public class JobTaskDataArchiverService implements JobTaskDataArchiver {
 
 
     @Autowired
@@ -50,7 +51,7 @@ public class ArchiveTransferService implements DataArchiver {
      */
     @Override
     @Transactional( rollbackFor = DataArchiverException.class )
-    public void executeArchive(ArchiveJobDetailTask acTask) throws DataArchiverException {
+    public void executeTaskDataArchive(ArchiveJobDetailTask acTask) throws DataArchiverException {
         ArchiveTaskLog taskLog = new ArchiveTaskLog(acTask);
 
         try {
@@ -62,9 +63,8 @@ public class ArchiveTransferService implements DataArchiver {
 
             acTask.setTaskStart(new Date());
              // 查询满足归档条件的数据
-            String whereSql = acTask.getTaskSql();
-            String sql = SqlUtils.buildAppendSelectSql(acTask.getTargetTable(), whereSql);
-            List<Map<String, Object>> data = archiveJobTaskService.querySourceList(sql);
+            String selSql = acTask.getTaskSelSql();
+            List<Map<String, Object>> data = archiveJobTaskService.querySourceList(selSql);
 
             // 组装将数据插入归档表的SQL
             String insertSql = SqlUtils.buildInsertSql(acTask.getTargetTable(), data.get(0));
@@ -80,19 +80,19 @@ public class ArchiveTransferService implements DataArchiver {
             acTask.setActualSize(total);
             acTask.setTaskEnd(new Date());
             // 更新本次搬运数据记录数，执行开始时间、结束时间 标记搬运完成
-            archiveJobTaskService.updateJobTaskStatus(acTask, ArchiveTaskStatus.MIGRATED);
+            archiveJobTaskService.updateJobTaskStatus(acTask, ArchiveTaskStatusEnum.MIGRATED);
 
-            taskLog.setTaskResult(ArchiveLogResult.SUCCESS.getStatus());
+            taskLog.setTaskResult(LogResultEnum.SUCCESS.getStatus());
             log.info("数据搬迁task的id = " + acTask.getId() + "任务执行成功！");
         } catch (Exception e) {
 
             String ex = ExceptionUtils.getStackTrace(e);
-            taskLog.setTaskResult(ArchiveLogResult.ERROR.getStatus());
+            taskLog.setTaskResult(LogResultEnum.ERROR.getStatus());
             if (ex.length() > 2000) {
                 ex = ex.substring(0, 2000);
             }
             taskLog.setErrorInfo(ex);
-            archiveJobTaskService.updateJobTaskStatusError(acTask, ArchiveTaskStatus.ERROR);
+            archiveJobTaskService.updateJobTaskStatusError(acTask, ArchiveTaskStatusEnum.ERROR);
             log.info("数据搬迁task的id = " + acTask.getId() + "任务执行失败");
             throw new DataArchiverException("执行归档任务失败", e);
         } finally {
@@ -110,7 +110,7 @@ public class ArchiveTransferService implements DataArchiver {
 
     public boolean executeCheckArchive(ArchiveJobConfig conf) {
         //检查当前批次任务是否出错
-        List<ArchiveJobDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatus.ERROR);
+        List<ArchiveJobDetailTask> taskList = archiveDao.queryArchiveConfDetailTaskList(conf, ArchiveTaskStatusEnum.ERROR);
         if (!CollectionUtils.isEmpty(taskList)) {
             log.info("当前批次任务存在出错任务！请人工检查！");
             return false;

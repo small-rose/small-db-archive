@@ -1,14 +1,14 @@
 package com.small.archive.core.delete.strategy;
 
 import com.small.archive.core.emuns.ArchiveJobPhase;
-import com.small.archive.core.emuns.ArchiveLogResult;
 import com.small.archive.core.emuns.ArchiveStrategyEnum;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
-import com.small.archive.core.transfer.ArchiveJobTaskService;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
+import com.small.archive.core.emuns.LogResultEnum;
 import com.small.archive.exception.DataArchiverException;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
 import com.small.archive.pojo.ArchiveTaskLog;
+import com.small.archive.service.ArchiveJobTaskService;
 import com.small.archive.service.ArchiveTaskLogService;
 import com.small.archive.utils.DigestUtils;
 import com.small.archive.utils.SqlUtils;
@@ -65,8 +65,8 @@ public class ArchiveTaskDeletePkNumberStrategy implements ArchiveTaskDeleteStrat
             taskLog.setJobBatchNo(acTask.getJobBatchNo());
 
              // 查询满足删除条件的数据
-            String whereSql = acTask.getTaskSql();
-            String sql = SqlUtils.buildAppendSelectSql(acTask.getSourceTable(), whereSql);
+            String selSql = acTask.getTaskSelSql();
+            String sql = SqlUtils.buildAppendSelectSql(acTask.getSourceTable(), selSql);
             List<Map<String, Object>> sourceList = archiveJobTaskService.querySourceList(sql);
 
             if (conf.getJobDelCheck() > 0) {
@@ -88,24 +88,23 @@ public class ArchiveTaskDeletePkNumberStrategy implements ArchiveTaskDeleteStrat
                 }
             }
 
-            String delSql = SqlUtils.buildAppendDeleteSql(acTask.getSourceTable(), whereSql);
+            String delSql = acTask.getTaskDelSql();
             log.info("归档删除任务，清理源库表数据SQL: {}" + delSql);
             int total = archiveJobTaskService.deleteSouceTab(delSql);
             if (total != acTask.getVerifySize()) {
                 throw new DataArchiverException("归档删除任务，删除源库数据后校对出现差异，回滚删除!");
             }
-            acTask.setDeleteSql(delSql);
             // 更新配置状态要已完成
-            archiveJobTaskService.updateJobTaskStatus(acTask, ArchiveTaskStatus.SUCCESS);
+            archiveJobTaskService.updateJobTaskStatus(acTask, ArchiveTaskStatusEnum.SUCCESS);
         } catch (Exception e) {
             String ex = ExceptionUtils.getStackTrace(e);
-            taskLog.setTaskResult(ArchiveLogResult.ERROR.getStatus());
+            taskLog.setTaskResult(LogResultEnum.ERROR.getStatus());
             if (ex.length() > 2000) {
                 ex = ex.substring(0, 2000);
             }
             taskLog.setErrorInfo(ex);
             // 更新配置状态出错
-            archiveJobTaskService.updateJobTaskStatusError(acTask, ArchiveTaskStatus.ERROR);
+            archiveJobTaskService.updateJobTaskStatusError(acTask, ArchiveTaskStatusEnum.ERROR);
 
             log.info("归档删除任务，执行失败：taskId= " + acTask.getId() + "：exception :" + ex);
             throw new DataArchiverException("归档删除任务，执行失败!", e);

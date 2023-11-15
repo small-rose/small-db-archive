@@ -34,4 +34,10 @@ public class SmallUtils {
     public static boolean hasText(@Nullable String str){
         return org.springframework.util.StringUtils.hasText(str);
     }
+
+
+    public static int countSubstring(String text, String sub) {
+        return text.split(sub, -1).length - 1;
+    }
+
 }

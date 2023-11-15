@@ -7,7 +7,7 @@ import com.small.archive.core.context.ArchiveContextHolder;
 import com.small.archive.core.emuns.ArchiveJobMode;
 import com.small.archive.core.emuns.ArchiveJobPhase;
 import com.small.archive.core.emuns.ArchiveJobStatus;
-import com.small.archive.core.emuns.ArchiveLogResult;
+import com.small.archive.core.emuns.LogResultEnum;
 import com.small.archive.exception.ArchiverCheckException;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveTaskLog;
@@ -90,7 +90,7 @@ public class CheckInterceptorManager {
             taskLog.setJobId(conf.getId());
             taskLog.setTaskPhase(ArchiveJobPhase.CHECK.getStatus());
             taskLog.setCreateTime(new Date());
-            taskLog.setTaskResult(ArchiveLogResult.ERROR.getStatus());
+            taskLog.setTaskResult(LogResultEnum.ERROR.getStatus());
             if (ex.length() > 2000) {
                 ex = ex.substring(0, 2000);
             }

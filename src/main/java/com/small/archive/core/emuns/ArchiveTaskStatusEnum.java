@@ -6,9 +6,9 @@ package com.small.archive.core.emuns;
  * @date: 2023/11/12 012 0:22
  * @version: v1.0
  */
-public enum ArchiveTaskStatus {
+public enum ArchiveTaskStatusEnum {
 
-    PREPARE("PREPARE","归档任务准备完成"),
+    PREPARED("PREPARE","归档任务准备完成"),
     HANDING("HANDING","归档任务数据搬运进行中"),
     MIGRATED("MIGRATED","归档任务数据搬运完成"),
     VERIFYING("VERIFYING","归档任务数据校对中"),
@@ -28,13 +28,13 @@ public enum ArchiveTaskStatus {
         return desc;
     }
 
-    ArchiveTaskStatus(String status, String desc) {
+    ArchiveTaskStatusEnum(String status, String desc) {
         this.status = status;
         this.desc = desc;
     }
 
-    public static ArchiveTaskStatus getParamType(String confMode) {
-         for (ArchiveTaskStatus modeType : ArchiveTaskStatus.values()){
+    public static ArchiveTaskStatusEnum getParamType(String confMode) {
+         for (ArchiveTaskStatusEnum modeType : ArchiveTaskStatusEnum.values()){
             if (modeType.status.equals(confMode)){
                 return modeType;
             }

@@ -1,4 +1,4 @@
-package com.small.archive.core.convertask;
+package com.small.archive.core.convertask.stategys;
 
 import com.small.archive.core.emuns.ArchiveStrategyEnum;
 import com.small.archive.pojo.ArchiveJobConfig;
@@ -10,9 +10,9 @@ import com.small.archive.pojo.ArchiveJobConfig;
  * @date: 2023/11/12 012 0:22
  * @version: v1.0
  */
-public interface ArchiveJobConvertTask {
+public interface ArchiveJobConvertStrategy {
 
-    public ArchiveStrategyEnum getMode();
+    public ArchiveStrategyEnum getStrategyMode();
 
     public boolean jobConvertTask(ArchiveJobConfig conf);
 

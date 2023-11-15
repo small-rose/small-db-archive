@@ -2,6 +2,7 @@ package com.small.archive.utils;
 
 import com.small.archive.core.emuns.ArchiveParamType;
 import com.small.archive.pojo.ArchiveJobConfParam;
+import com.small.archive.pojo.ArchiveJobConfig;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -26,16 +27,9 @@ public class SqlUtils {
         return sb.toString();
     }
 
-    public static String buildSelectSql(String tableName, String whereStr) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("SELECT DISTINCT * FROM ").append(tableName).append(" ").append(whereStr);
-        return sb.toString();
-    }
-
-
     public static String buildAppendSelectSql(String tableName, String whereSql) {
         StringBuffer sb = new StringBuffer();
-        sb.append("SELECT * FROM").append(tableName).append(" ").append(whereSql);
+        sb.append("SELECT DISTINCT * FROM").append(tableName).append(" ").append(whereSql);
         return sb.toString();
     }
 
@@ -65,7 +59,12 @@ public class SqlUtils {
         return sb.toString();
     }
 
-
+    /**
+     *  组装SQL条件
+     * @param sql
+     * @param paramList
+     * @return
+     */
     public static String buildTaskSql(String sql, List<ArchiveJobConfParam> paramList) {
         if (CollectionUtils.isEmpty(paramList)){
             return sql;
@@ -76,7 +75,44 @@ public class SqlUtils {
                 param.setParamValue(" date'".concat(param.getParamValue()).concat("' "));
             }
             sql.replace(param.getParamName(), param.getParamValue());
+
         }
         return tmp;
+    }
+
+    /**
+     * SELECT *
+     * FROM (
+     *   SELECT a.*, ROWNUM r
+     *   FROM my_table a
+     *   WHERE ROWNUM <= 30
+     * )
+     * WHERE r >= 20;
+     *
+     * @param jobConfig
+     * @param sql
+     * @return
+     */
+    public static String buildAppendSelectSqlPages(ArchiveJobConfig jobConfig, String sql, long start, long end) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT T.* FROM ( SELECT  X.*, ROWNUM R FROM  (");
+        sb.append("SELECT DISTINCT * FROM").append(jobConfig.getSourceTable()).append(" ").append(sql);
+        sb.append(") X  WHERE X.R > ").append(start);
+        sb.append(" ) T WHERE T.R <= ").append(end);
+        return sb.toString();
+    }
+
+    /**
+     * 组装分页删除
+     * @param jobConfig
+     * @param sql
+     * @param numEnd
+     * @return
+     */
+    public static String buildAppendDeleteSqlPages(ArchiveJobConfig jobConfig, String sql, long numEnd) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("DELETE * FROM").append(jobConfig.getSourceTable()).append(" ").append(sql);
+        sb.append(" AND ROWNUM <= ").append(numEnd);
+        return sb.toString();
     }
 }

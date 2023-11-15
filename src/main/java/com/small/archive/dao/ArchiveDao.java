@@ -2,7 +2,7 @@ package com.small.archive.dao;
 
 import com.small.archive.core.emuns.ArchiveJobMode;
 import com.small.archive.core.emuns.ArchiveJobStatus;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.pojo.ArchiveJobConfParam;
 import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,16 +46,22 @@ public class ArchiveDao {
 
     public List<ArchiveJobConfParam> queryArchiveConfParamList(){
         String sql = " select * from ARCHIVE_JOB_CONFIG_PARAM a where if_valid=1 order by a.confId ";
-        return jdbcTemplateService.queryForList(sql, ArchiveJobConfParam.class);
+        return jdbcTemplate.queryForList(sql, ArchiveJobConfParam.class);
     }
 
+    public List<ArchiveJobConfParam> queryArchiveJobConfParamListByJobId(long jobId){
+        String sql = " select * from ARCHIVE_JOB_CONFIG_PARAM a where a.job_id=? and a.if_valid=1 order by a.confId ";
+        List params = new ArrayList();
+        params.add(jobId);
+        return jdbcTemplate.queryForList(sql, ArchiveJobConfParam.class, params.toArray());
+    }
 
     public List<ArchiveJobConfParam> queryArchiveConfParamListByConfId(long confId){
         String sql = " select * from ARCHIVE_JOB_CONFIG_PARAM a where a.job_status = '1' and a.conf_id="+confId+" order by a.confId ";
         return jdbcTemplateService.queryForList(sql, ArchiveJobConfParam.class);
     }
 
-    public List<ArchiveJobDetailTask> queryArchiveConfDetailTaskList(ArchiveJobConfig conf, ArchiveTaskStatus taskStatus){
+    public List<ArchiveJobDetailTask> queryArchiveConfDetailTaskList(ArchiveJobConfig conf, ArchiveTaskStatusEnum taskStatus){
         String sql = " select t.* from  ARCHIVE_JOB_CONFIG_DETAIL_TASK t  where t.job_id "+conf.getId()+
                 " and a.job_batch_no = '"+conf.getJobBatchNo()+"' a.task_status = '"+taskStatus.getStatus()+"' order by a.task_order ";
         return jdbcTemplateService.queryForList(sql, ArchiveJobDetailTask.class);

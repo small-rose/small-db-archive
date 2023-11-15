@@ -5,6 +5,7 @@ import com.small.archive.dao.ArchiveCheckDao;
 import com.small.archive.dao.ArchiveTaskDao;
 import com.small.archive.exception.ArchiverCheckException;
 import com.small.archive.pojo.ArchiveJobConfParam;
+import com.small.archive.pojo.ArchiveJobConfig;
 import com.small.archive.pojo.ArchiveJobDetailTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -31,23 +32,24 @@ public class ArchiveSqlService {
 
 
     @Autowired
-    private ArchiveTaskDao archiveTaskDao ;
+    private ArchiveTaskDao archiveTaskDao;
     @Autowired
-    private ArchiveCheckDao archiveCheckDao ;
+    private ArchiveCheckDao archiveCheckDao;
 
-    public List<ArchiveJobConfParam> calculateDateParams(List<ArchiveJobConfParam> noIdList) {
+    public List<ArchiveJobConfParam> calculateDateParams(List<ArchiveJobConfParam> paramList) {
 
-        if (CollectionUtils.isEmpty(noIdList)){
+        if (CollectionUtils.isEmpty(paramList)) {
             return Collections.emptyList();
         }
         ArchiveJobConfParam param = null;
         List<ArchiveJobConfParam> resultList = new ArrayList<>();
-        for (ArchiveJobConfParam tmp : noIdList) {
+        for (ArchiveJobConfParam tmp : paramList) {
             param = new ArchiveJobConfParam();
             BeanUtils.copyProperties(tmp, param);
-            if (ArchiveParamType.DATE.name().equalsIgnoreCase(tmp.getParamType())){
+            if (ArchiveParamType.DATE.name().equalsIgnoreCase(tmp.getParamType())) {
                 Date date = archiveTaskDao.queryForDate(tmp.getParamValue());
-                 param.setParamValue(new SimpleDateFormat("yyyy-MM-dd").format(date));
+                param.setParamValue(new SimpleDateFormat(tmp.getParamExtVal()).format(date));
+                param.setParamValueDate(date);
             }
             resultList.add(param);
         }
@@ -56,9 +58,30 @@ public class ArchiveSqlService {
 
     public void checkTaskSql(String sql, ArchiveJobDetailTask task) {
         try {
-            long nums  = archiveCheckDao.checkSql(sql);
+            long nums = archiveCheckDao.checkSql(sql);
             task.setExpectSize(nums);
-        }catch (Exception e){
+        } catch (Exception e) {
+            throw new ArchiverCheckException("校验任务SQL执行失败", e);
+        }
+    }
+
+    public ArchiveJobConfParam queryMinDate(ArchiveJobConfig jobConfig) {
+        ArchiveJobConfParam param = new ArchiveJobConfParam();
+        param.setJobId(jobConfig.getId());
+        param.setJobMode(jobConfig.getJobMode());
+        param.setIfValid(1);
+        param.setParamName(jobConfig.getJobColumns());
+        param.setParamPk(jobConfig.getJobColumns());
+        param.setParamType("Date");
+        param.setParamExtVal("yyyy-MM-dd");
+        param.setExt1("AUTO");
+        try {
+            String sql = "select min(" + jobConfig.getJobColumns() + ") from " + jobConfig.getSourceTable();
+            Date minDate = archiveCheckDao.queryMinDate(sql);
+            param.setParamValue(new SimpleDateFormat("yyyy-MM-dd").format(minDate));
+            //自动生成一个Param 并保存到数据库
+            return param;
+        } catch (Exception e) {
             throw new ArchiverCheckException("校验任务SQL执行失败", e);
         }
     }

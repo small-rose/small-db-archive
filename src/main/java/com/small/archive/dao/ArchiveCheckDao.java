@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,4 +116,7 @@ public class ArchiveCheckDao {
     }
 
 
+    public Date queryMinDate(String sql) {
+        return jdbcTemplate.queryForObject(sql, Date.class);
+    }
 }

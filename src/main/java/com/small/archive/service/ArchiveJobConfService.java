@@ -1,7 +1,7 @@
 package com.small.archive.service;
 
 import com.small.archive.core.emuns.ArchiveJobStatus;
-import com.small.archive.core.emuns.ArchiveTaskStatus;
+import com.small.archive.core.emuns.ArchiveTaskStatusEnum;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.pojo.ArchiveJobConfParam;
 import com.small.archive.pojo.ArchiveJobConfig;
@@ -35,7 +35,7 @@ public class ArchiveJobConfService {
     }
 
 
-    public List<ArchiveJobDetailTask> queryArchiveConfDetailTaskList(ArchiveJobConfig conf, ArchiveTaskStatus prepare) {
+    public List<ArchiveJobDetailTask> queryArchiveConfDetailTaskList(ArchiveJobConfig conf, ArchiveTaskStatusEnum prepare) {
         return archiveDao.queryArchiveConfDetailTaskList(conf,prepare);
     }
 
@@ -57,5 +57,9 @@ public class ArchiveJobConfService {
 
     public List<ArchiveJobConfParam> queryArchiveConfParamList() {
         return archiveDao.queryArchiveConfParamList();
+    }
+
+    public List<ArchiveJobConfParam> queryArchiveConfParamListByConfId(long jobId) {
+        return archiveDao.queryArchiveConfParamListByConfId(jobId);
     }
 }

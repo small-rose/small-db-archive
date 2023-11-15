@@ -1,6 +1,6 @@
 package com.small.archive.schedule;
 
-import com.small.archive.core.delete.ArchivedJobDelete;
+import com.small.archive.core.convertask.ArchiveConfToTaskService;
 import com.small.archive.core.emuns.ArchiveJobStatus;
 import com.small.archive.dao.ArchiveDao;
 import com.small.archive.pojo.ArchiveJobConfig;
@@ -11,11 +11,10 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
-
 /**
  * @Project : small-db-archive
- * @description: TODO 功能角色说明： ArchiveTaskWatchService
- * TODO 描述：   数据校对
+ * @description: TODO 功能角色说明：ArchiveJobConfConvertTask
+ * TODO 描述：
  * @author: 张小菜
  * @date: 2023/11/12 012 0:22
  * @version: v1.0
@@ -23,30 +22,26 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ArchiveDeleteTask {
+public class ArchiveJobConfConvertTask {
 
 
     @Autowired
     private ArchiveDao archiveDao;
 
     @Autowired
-    private ArchivedJobDelete archivedJobDelete;
+    private ArchiveConfToTaskService archiveConfToTaskService;
 
 
-    public void archiveTaskDeleteSourceData() {
-
+    public void archiveConfConvert2Task() {
         ArchiveJobConfig query = new ArchiveJobConfig();
-        query.setJobStatus(ArchiveJobStatus.VERIFY_SUCCESS.getStatus());
+        query.setJobStatus(ArchiveJobStatus.CHECKED_SUCCESS.getStatus());
         List<ArchiveJobConfig> archiveJobConfigs = archiveDao.queryArchiveConfList(query);
         if (CollectionUtils.isEmpty(archiveJobConfigs)) {
-            log.info("位找到搬运完成配置，不执行数据搬运");
-            return;
+            log.info("未检测校验成功[CHECKED_SUCCESS]可拆解执行的归档配置！");
+        } else {
+            for (ArchiveJobConfig conf : archiveJobConfigs) {
+                archiveConfToTaskService.conf2Task(conf);
+            }
         }
-        for (ArchiveJobConfig conf : archiveJobConfigs) {
-            //数据校对
-            archivedJobDelete.jobArchivedDataDelete(conf);
-
-        }
-
     }
 }

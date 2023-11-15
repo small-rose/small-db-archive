@@ -1,11 +1,11 @@
 package com.small.archive.task;
 
 import com.small.archive.base.SmallDbArchiveAppTests;
-import com.small.archive.schedule.ArchiveConfCheckTask;
-import com.small.archive.schedule.ArchiveConfConvertTask;
-import com.small.archive.schedule.ArchiveDeleteTask;
-import com.small.archive.schedule.ArchiveTransferTask;
-import com.small.archive.schedule.ArchiveVerifyTask;
+import com.small.archive.schedule.ArchiveDataClearTask;
+import com.small.archive.schedule.ArchiveDataTransferTask;
+import com.small.archive.schedule.ArchiveDataVerifyTask;
+import com.small.archive.schedule.ArchiveJobConfCheckTask;
+import com.small.archive.schedule.ArchiveJobConfConvertTask;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,17 +20,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ArchiveAllTaskTests extends SmallDbArchiveAppTests {
 
     @Autowired
-    private ArchiveConfCheckTask archiveConfCheckTask;
+    private ArchiveJobConfCheckTask archiveJobConfCheckTask;
     @Autowired
-    private ArchiveConfConvertTask archiveConfConvertTask;
+    private ArchiveJobConfConvertTask archiveJobConfConvertTask;
 
 
     @Autowired
-    private ArchiveTransferTask archiveTransferTask;
+    private ArchiveDataTransferTask archiveDataTransferTask;
     @Autowired
-    private ArchiveVerifyTask archiveVerifyTask;
+    private ArchiveDataVerifyTask archiveDataVerifyTask;
     @Autowired
-    private ArchiveDeleteTask archiveDeleteTask;
+    private ArchiveDataClearTask archiveDataClearTask;
 
     /**
      * 验证配置
@@ -38,7 +38,7 @@ public class ArchiveAllTaskTests extends SmallDbArchiveAppTests {
     @Test
     public void checkConf(){
 
-        archiveConfCheckTask.archiveConfWatch();
+        archiveJobConfCheckTask.archiveConfWatch();
     }
 
     /**
@@ -47,7 +47,7 @@ public class ArchiveAllTaskTests extends SmallDbArchiveAppTests {
     @Test
     public void convert2Task(){
 
-        archiveConfConvertTask.archiveConfConvert2Task();
+        archiveJobConfConvertTask.archiveConfConvert2Task();
     }
 
     /**
@@ -55,7 +55,7 @@ public class ArchiveAllTaskTests extends SmallDbArchiveAppTests {
      */
     @Test
     public void transfer(){
-        archiveTransferTask.archiveTaskExec();
+        archiveDataTransferTask.archiveTaskExec();
     }
 
     /**
@@ -63,7 +63,7 @@ public class ArchiveAllTaskTests extends SmallDbArchiveAppTests {
      */
     @Test
     public void verify(){
-        archiveVerifyTask.archiveTaskVerify();
+        archiveDataVerifyTask.archiveTaskVerify();
     }
 
 
@@ -72,6 +72,6 @@ public class ArchiveAllTaskTests extends SmallDbArchiveAppTests {
      */
     @Test
     public void delete(){
-        archiveDeleteTask.archiveTaskDeleteSourceData();
+        archiveDataClearTask.archiveTaskDeleteSourceData();
     }
 }
